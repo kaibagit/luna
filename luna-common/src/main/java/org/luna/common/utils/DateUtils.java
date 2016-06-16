@@ -1,3 +1,5 @@
+package org.luna.common.utils;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
