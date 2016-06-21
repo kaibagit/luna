@@ -1,0 +1,16 @@
+group 'org.luna'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.netty:netty-all:4.0.34.Final'
+    compile 'org.javassist:javassist:3.18.0-GA'
+    compile 'com.alibaba:fastjson:1.1.22'
+}
