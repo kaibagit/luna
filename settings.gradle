@@ -1,4 +1,5 @@
 rootProject.name = 'luna'
 include 'luna-common'
 include 'luna-rpc'
+include 'luna-example'
 
