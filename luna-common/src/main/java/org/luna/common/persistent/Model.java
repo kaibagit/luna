@@ -11,9 +11,9 @@ public abstract class Model extends ActiveRecord {
 
     @Id
     @GeneratedValue
-    protected Integer id;
-    protected Date createTime;
-    protected Date updateTime;
+    public Integer id;
+    public Date createTime;
+    public Date updateTime;
 
     public void save(){
         validate();
