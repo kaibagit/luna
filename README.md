@@ -20,3 +20,8 @@
 ### 前端
 * JS框架：jQuery
 * CSS框架：Bootstrap AdminLTE
+
+## 计划
+* 自动打包
+* 单元测试
+* 开发不用重启
