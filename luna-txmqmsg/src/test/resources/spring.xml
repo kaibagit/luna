@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+				         http://www.springframework.org/schema/beans/sprinsg-beans-3.0.xsd
+				         http://www.springframework.org/schema/context
+				         http://www.springframework.org/schema/context/spring-context-3.0.xsd
+				         http://www.springframework.org/schema/tx
+				         http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+				         http://www.springframework.org/schema/aop 
+				         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	<bean id="mqProducer" class="com.alibaba.rocketmq.client.producer.DefaultMQProducer">
+		<property name="namesrvAddr" value="localhost:9876"  />
+		<property name="instanceName" value="txmqmsg_producer" />
+		<property name="defaultTopicQueueNums" value="4" />
+		<property name="retryTimesWhenSendFailed" value="3" />
+	</bean>
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/test"/>
+		<property name="username" value="root"/>
+		<property name="password" value="123456"/>
+	</bean>
+
+    <bean class="org.luna.txmqmsg.rocketmq.client.RocketMqTxMessageManager">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mqProducer" ref="mqProducer"/>
+	</bean>
+
+	<bean class="org.luna.txmqmsg.rocketmq.recover.RocketMqTxMessageRecovery">
+		<property name="dataSource" ref="dataSource" />
+		<property name="zookeeperAddresses" value="114.55.249.192:2181,114.55.249.192:2181,114.55.229.151:2181" />
+	</bean>
+
+</beans>
+				         

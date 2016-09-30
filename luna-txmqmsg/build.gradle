@@ -1,0 +1,20 @@
+group 'org.luna'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.5
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.alibaba.rocketmq:rocketmq-client:3.2.6'
+    compile 'org.apache.curator:curator-recipes:2.5.0'
+
+    compile 'org.springframework:spring-tx:4.0.9.RELEASE'
+    compile 'org.springframework:spring-jdbc:4.0.9.RELEASE'
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
