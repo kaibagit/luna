@@ -7,9 +7,9 @@ import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
  */
 public class RecoverLeaderLatchListener implements LeaderLatchListener {
 
-    private TxLogRetryFetchTask txLogRetryFetchTask;
+    private LogRecoverTask txLogRetryFetchTask;
 
-    public RecoverLeaderLatchListener(TxLogRetryFetchTask txLogRetryFetchTask){
+    public RecoverLeaderLatchListener(LogRecoverTask txLogRetryFetchTask){
         this.txLogRetryFetchTask = txLogRetryFetchTask;
     }
 

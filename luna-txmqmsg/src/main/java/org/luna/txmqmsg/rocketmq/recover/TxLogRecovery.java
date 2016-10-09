@@ -1,23 +1,26 @@
 package org.luna.txmqmsg.rocketmq.recover;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import com.alibaba.rocketmq.client.producer.MQProducer;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.luna.txmqmsg.common.RetryRuleManager;
+import org.luna.txmqmsg.rocketmq.common.LogPushManager;
+import org.luna.txmqmsg.rocketmq.common.LogStorage;
 
 /**
  * Created by luliru on 2016/9/18.
  */
-public class RocketMqTxMessageRecovery {
+public class TxLogRecovery {
 
     private String[] zookeeperAddressArray;
 
@@ -29,22 +32,25 @@ public class RocketMqTxMessageRecovery {
 
     private String databaseName;
 
-    private TxLogRetryStorage txLogRetryStorage;
-
-    private ExecutorService executor;
-
-    private Map<Integer,RetryInterval> retryRules;
+    private ExecutorService pushExecutor;
 
     private CuratorFramework client;
 
     private LeaderLatch leaderLatch;
 
+    private MQProducer mqProducer;
+
+    private ScheduledExecutorService fetchTashExecutor;
+
     public void init(){
         try{
-            executor = Executors.newFixedThreadPool(executeThreadNum);
-            txLogRetryStorage = new TxLogRetryStorage(dataSource,databaseName);
+            pushExecutor = Executors.newFixedThreadPool(executeThreadNum);
+            LogStorage txLogRetryStorage = new LogStorage(dataSource,databaseName);
 
-            TxLogRetryFetchTask fetchTask = new TxLogRetryFetchTask(txLogRetryStorage);
+            RetryRuleManager retryRuleManager = new RetryRuleManager();
+            LogPushManager logPushManager = new LogPushManager(txLogRetryStorage,retryRuleManager,mqProducer);
+
+            LogRecoverTask fetchTask = new LogRecoverTask(txLogRetryStorage,logPushManager,pushExecutor);
 
             String conectionZookeeperAddress = zookeeperAddressArray[new Random().nextInt(zookeeperAddressArray.length)];
 
@@ -56,13 +62,8 @@ public class RocketMqTxMessageRecovery {
             leaderLatch.addListener(new RecoverLeaderLatchListener(fetchTask));
             leaderLatch.start();
 
-            retryRules = new HashMap<>();
-            retryRules.put(1,new RetryInterval(3,TimeUnit.MINUTES));
-            retryRules.put(2,new RetryInterval(8,TimeUnit.MINUTES));
-            retryRules.put(3,new RetryInterval(20,TimeUnit.MINUTES));
-            retryRules.put(4,new RetryInterval(1,TimeUnit.HOURS));
-            retryRules.put(5,new RetryInterval(3,TimeUnit.HOURS));
-            retryRules.put(6,new RetryInterval(8,TimeUnit.HOURS));
+            fetchTashExecutor = Executors.newScheduledThreadPool(1);
+            fetchTashExecutor.scheduleAtFixedRate(fetchTask,0,1,TimeUnit.SECONDS);  //每隔一秒执行一次查询
         }catch (Exception e){
             throw new RuntimeException(e);
         }
@@ -70,9 +71,10 @@ public class RocketMqTxMessageRecovery {
 
     public void destroy(){
         try{
-            executor.shutdown();
+            pushExecutor.shutdown();
             client.close();
             leaderLatch.close();
+            fetchTashExecutor.shutdown();
         }catch (Exception e){
             throw new RuntimeException(e);
         }
@@ -89,16 +91,13 @@ public class RocketMqTxMessageRecovery {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
-}
 
-class RetryInterval{
+    public void setMqProducer(MQProducer mqProducer) {
+        this.mqProducer = mqProducer;
+    }
 
-    private Integer interval;
-    private TimeUnit timeUnit;
-
-    public RetryInterval(Integer interval,TimeUnit timeUnit){
-        this.interval = interval;
-        this.timeUnit = timeUnit;
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 }
 

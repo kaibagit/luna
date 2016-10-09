@@ -1,11 +1,14 @@
 package org.luna.txmqmsg.rocketmq.common;
 
+import org.luna.txmqmsg.api.TxLog;
+
 import java.util.Date;
 
 /**
+ * 已持久化的事务日志
  * Created by luliru on 2016/9/23.
  */
-public class RocketMqPersistentTxMessage {
+public class PersistentLog implements TxLog {
 
     private String id;
 

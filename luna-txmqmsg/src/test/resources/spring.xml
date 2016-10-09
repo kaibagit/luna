@@ -27,13 +27,14 @@
 		<property name="password" value="123456"/>
 	</bean>
 
-    <bean class="org.luna.txmqmsg.rocketmq.client.RocketMqTxMessageManager">
+    <bean class="org.luna.txmqmsg.rocketmq.client.TxLogManager">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="mqProducer" ref="mqProducer"/>
 	</bean>
 
-	<bean class="org.luna.txmqmsg.rocketmq.recover.RocketMqTxMessageRecovery">
+	<bean class="org.luna.txmqmsg.rocketmq.recover.TxLogRecovery">
 		<property name="dataSource" ref="dataSource" />
+		<property name="mqProducer" ref="mqProducer" />
 		<property name="zookeeperAddresses" value="114.55.249.192:2181,114.55.249.192:2181,114.55.229.151:2181" />
 	</bean>
 

@@ -3,9 +3,9 @@ package org.luna.txmqmsg.api;
 /**
  * Created by Administrator on 2016/9/13.
  */
-public interface TxMessageManager {
+public interface TxLogManager {
 
-    public String prepare(TxMessage txMessage);
+    public String prepare(TxLog txMessage);
 
     public void execute();
 

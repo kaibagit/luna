@@ -8,5 +8,10 @@ public class Constraint {
     /**
      * 日志名称
      */
-    public static String LOG_NAME = "luna-mq-tx";
+    public static final String LOG_NAME = "luna-mq-tx";
+
+    /**
+     * 事务日志存放的默认数据库名
+     */
+    public static final String DEFAULT_LOG_DATABASE_NAME = "txmqmsg";
 }
