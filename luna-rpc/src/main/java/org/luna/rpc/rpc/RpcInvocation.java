@@ -1,4 +1,4 @@
-package org.luna.rpc;
+package org.luna.rpc.rpc;
 
 import java.util.Map;
 
