@@ -1,8 +1,9 @@
 package org.luna.rpc.protocol;
 
-import org.luna.rpc.Exporter;
-import org.luna.rpc.Invoker;
-import org.luna.rpc.URL;
+import org.luna.rpc.core.Client;
+import org.luna.rpc.core.Exporter;
+import org.luna.rpc.core.Invoker;
+import org.luna.rpc.core.URL;
 
 /**
  * 协议
@@ -27,6 +28,6 @@ public interface Protocol {
      * @param url
      * @return
      */
-    <T> Exporter<T> refer(Class<T> clz, URL url);
+    <T> Client<T> refer(Class<T> clz, URL url);
 
 }

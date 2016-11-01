@@ -1,11 +1,22 @@
 package org.luna.rpc.proxy;
 
-import java.lang.reflect.InvocationHandler;
+import org.luna.rpc.core.Client;
+import org.luna.rpc.core.Invoker;
+import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.URL;
 
 /**
  * Created by luliru on 2016/10/14.
  */
 public interface ProxyFactory {
 
-    <T> T getProxy(Class<T> clz, InvocationHandler invocationHandler);
+    /**
+     * create proxy.
+     */
+    <T> T getProxy(Class<T> clz,Client<T> client) throws LunaRpcException;
+
+    /**
+     * create invoker.
+     */
+    <T> Invoker<T> getInvoker(T proxy, Class<T> clz, URL url) throws LunaRpcException;
 }

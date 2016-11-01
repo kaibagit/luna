@@ -10,7 +10,7 @@ public class Server {
     public static void main(String[] args){
 
         Provider provider = new Provider(8080);
-        provider.registrer(UserService.class,new UserServiceImpl());
+        provider.registrer(DemoService.class,new DemoServiceImpl());
 
         provider.start();
     }
