@@ -1,5 +1,6 @@
 package org.luna.rpc.core;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,22 +15,21 @@ public class URL {
 
     private int port;
 
-    private String group;
+    private String application;
 
     private String service;
 
     private String version;
 
-    private Map<String, String> parameters;
+    private Map<String, String> parameters = new HashMap<>();
 
-    public URL(String protocol, String host, int port, String group, String service, String version, Map<String, String> parameters) {
+    public URL(String protocol, String host, int port, String application, String service, String version) {
         this.protocol = protocol;
         this.host = host;
         this.port = port;
-        this.group = group;
+        this.application = application;
         this.service = service;
         this.version = version;
-        this.parameters = parameters;
     }
 
     public static URL valueOf(String url){

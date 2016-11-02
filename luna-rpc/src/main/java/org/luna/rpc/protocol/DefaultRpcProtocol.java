@@ -1,5 +1,6 @@
 package org.luna.rpc.protocol;
 
+import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Exporter;
 import org.luna.rpc.core.Invoker;
 import org.luna.rpc.core.URL;
@@ -15,7 +16,7 @@ public class DefaultRpcProtocol implements Protocol {
     }
 
     @Override
-    public <T> Exporter<T> refer(Class<T> clz, URL url) {
+    public <T> Client<T> refer(Class<T> clz, URL url) {
         return null;
     }
 
