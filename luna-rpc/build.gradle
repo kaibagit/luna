@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    compile 'org.slf4j:slf4j-api:1.5.8'
     compile 'io.netty:netty-all:4.0.34.Final'
     compile 'org.javassist:javassist:3.18.0-GA'
     compile 'com.alibaba:fastjson:1.1.22'

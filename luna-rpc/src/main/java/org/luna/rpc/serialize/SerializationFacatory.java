@@ -1,7 +1,7 @@
 package org.luna.rpc.serialize;
 
-import org.luna.rpc.RpcException;
 import org.luna.rpc.common.constant.SerializationType;
+import org.luna.rpc.core.LunaRpcException;
 
 /**
  * Created by kaiba on 2016/5/30.
@@ -15,7 +15,7 @@ public class SerializationFacatory {
             case SerializationType.JSON:
                 return new JsonSerialization();
             default:
-                throw new RpcException("unsupport serializationType");
+                throw new LunaRpcException("unsupport serializationType");
         }
     }
 }

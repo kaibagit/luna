@@ -1,11 +1,19 @@
 package org.luna.rpc.config;
 
+import org.luna.rpc.core.Exporter;
+import org.luna.rpc.core.Invoker;
 import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.core.URL;
+import org.luna.rpc.core.buildin.DefaultInvoker;
+import org.luna.rpc.core.extension.ExtensionLoader;
+import org.luna.rpc.protocol.FilterWrapperProtocol;
+import org.luna.rpc.protocol.Protocol;
+import org.luna.rpc.proxy.ProxyFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by kaiba on 2016/11/1.
@@ -31,40 +39,16 @@ public class ServiceConfig<T> {
     /** service接口实现类 */
     private T ref;
 
-    private List<ProtocolAndPort> protocolAndPortList = new ArrayList<>();
+    private List<Exporter<T>> exporters = new CopyOnWriteArrayList<Exporter<T>>();
 
     public synchronized void export() {
-//        if (exported.get()) {
-//            LoggerUtil.warn(String.format("%s has already been expoted, so ignore the export request!", interfaceClass.getName()));
-//            return;
-//        }
-//
-//        checkInterfaceAndMethods(interfaceClass, methods);
-//
-//        List<URL> registryUrls = loadRegistryUrls();
-//        if (registryUrls == null || registryUrls.size() == 0) {
-//            throw new IllegalStateException("Should set registry config for service:" + interfaceClass.getName());
-//        }
-//
-//        Map<String, Integer> protocolPorts = getProtocolAndPort();
-//        for (ProtocolConfig protocolConfig : protocols) {
-//            Integer port = protocolPorts.get(protocolConfig.getId());
-//            if (port == null) {
-//                throw new MotanServiceException(String.format("Unknow port in service:%s, protocol:%s", interfaceClass.getName(),
-//                        protocolConfig.getId()));
-//            }
-//            doExport(protocolConfig, port, registryUrls);
-//        }
-//
-//        afterExport();
-
         List<URL> urls = new ArrayList<>();
         for(ProtocolConfig protocol : protocols){
             urls.add(createURL(protocol));
         }
 
         for(URL url : urls){
-
+            exporters.add(createExporter(serviceClass,url,ref));
         }
 
     }
@@ -72,6 +56,14 @@ public class ServiceConfig<T> {
     private URL createURL(ProtocolConfig protocol){
         URL url = new URL(protocol.getName(),protocol.getHost(),protocol.getPort(),application.getName(),serviceClass.getName(),version);
         return url;
+    }
+
+    private Exporter<T> createExporter(Class<T> serviceClass,URL url,T ref){
+        Protocol protocol = ExtensionLoader.getExtension(Protocol.class,url.getProtocol());
+        protocol = new FilterWrapperProtocol(protocol);
+        Invoker<T> invoker = new DefaultInvoker<>(ref,url,serviceClass);
+        Exporter<T> exporter = protocol.export(invoker, url);
+        return exporter;
     }
 
     public void setProtocols(List<ProtocolConfig> protocols) {
@@ -107,11 +99,6 @@ public class ServiceConfig<T> {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public void addProtocolAndPort(String protocol, int port){
-        ProtocolAndPort pap = new ProtocolAndPort(protocol,port);
-        protocolAndPortList.add(pap);
     }
 
     class ProtocolAndPort{

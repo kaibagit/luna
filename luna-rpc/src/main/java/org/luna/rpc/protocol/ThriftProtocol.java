@@ -9,8 +9,9 @@ import org.luna.rpc.core.URL;
  * Created by kaiba on 2016/5/24.
  */
 public class ThriftProtocol implements Protocol {
+
     @Override
-    public <T> Exporter<T> export(Invoker invoker, URL url) {
+    public <T> Exporter<T> export(Invoker<T> invoker, URL url) {
         return null;
     }
 

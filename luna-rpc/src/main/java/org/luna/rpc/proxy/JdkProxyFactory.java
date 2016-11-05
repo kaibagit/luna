@@ -6,6 +6,7 @@ import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.core.URL;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
@@ -24,7 +25,13 @@ public class JdkProxyFactory implements ProxyFactory {
 
     @Override
     public <T> Invoker<T> getInvoker(T proxy, Class<T> clz, URL url) throws LunaRpcException {
-        return null;
+        return ( Invoker)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{clz}, new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+//                return method.invoke(proxy,);
+                return null;
+            }
+        });
     }
 
 //    /** 动态代理类的类名后缀 */

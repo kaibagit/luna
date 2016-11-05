@@ -18,7 +18,7 @@ public interface Protocol {
      * @param <T>
      * @return
      */
-    <T> Exporter<T> export(Invoker invoker, URL url);
+    <T> Exporter<T> export(Invoker<T> invoker, URL url);
 
     /**
      * 引用服务

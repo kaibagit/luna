@@ -8,4 +8,8 @@ public class LunaRpcException extends RuntimeException {
     public LunaRpcException(String message){
         super(message);
     }
+
+    public LunaRpcException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

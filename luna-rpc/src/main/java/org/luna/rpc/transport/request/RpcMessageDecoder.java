@@ -3,8 +3,8 @@ package org.luna.rpc.transport.request;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import org.luna.rpc.RpcException;
 import org.luna.rpc.common.constant.MessageConstant;
+import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.transport.RpcRequest;
 import org.luna.rpc.transport.RpcResponse;
 
@@ -21,10 +21,10 @@ public class RpcMessageDecoder extends ByteToMessageDecoder {
             return;
         }
         if(in.getShort(0) != MessageConstant.MAGIC){
-            throw new RpcException("not support message magic");
+            throw new LunaRpcException("not support message magic");
         }
         if(in.getShort(15) != MessageConstant.HEAD_LENGTH){
-            throw new RpcException("error message head lenght");
+            throw new LunaRpcException("error message head lenght");
         }
         long bodySize = in.getLong(128);
         if(in.readableBytes() < MessageConstant.HEAD_LENGTH+bodySize){
