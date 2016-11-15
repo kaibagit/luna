@@ -42,6 +42,11 @@ public class FilterWrapperProtocol implements Protocol {
                 }
 
                 @Override
+                public URL getUrl() {
+                    return url;
+                }
+
+                @Override
                 public Result call(Invocation invocation) {
                     return filter.filter(tempFilter,invocation);
                 }

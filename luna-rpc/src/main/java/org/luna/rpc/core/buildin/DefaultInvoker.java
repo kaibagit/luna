@@ -28,6 +28,11 @@ public class DefaultInvoker<T> implements Invoker<T> {
     }
 
     @Override
+    public URL getUrl() {
+        return url;
+    }
+
+    @Override
     public Result call(Invocation invocation) {
         DefaultRpcResult result = new DefaultRpcResult();
         Method method = null;

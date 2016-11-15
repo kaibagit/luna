@@ -7,6 +7,12 @@ import java.util.Map;
  */
 public interface Invocation {
 
+    String getApplication();
+
+    String getServiceName();
+
+    String getVersion();
+
     /**
      * get method name.
      *

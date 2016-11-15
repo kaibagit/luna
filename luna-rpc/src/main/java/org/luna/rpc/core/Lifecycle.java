@@ -1,4 +1,4 @@
-package org.luna.rpc.core.extension;
+package org.luna.rpc.core;
 
 /**
  * Created by luliru on 2016/10/17.

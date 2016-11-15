@@ -13,6 +13,9 @@ public class ProtocolConfig {
 
     private int port;
 
+    // 序列化方式
+    private String serialization;
+
     private int heartbeat;
 
     public String getName() {
@@ -45,5 +48,13 @@ public class ProtocolConfig {
 
     public void setHeartbeat(int heartbeat) {
         this.heartbeat = heartbeat;
+    }
+
+    public String getSerialization() {
+        return serialization;
+    }
+
+    public void setSerialization(String serialization) {
+        this.serialization = serialization;
     }
 }

@@ -36,6 +36,18 @@ public class URL {
         return null;
     }
 
+    public String getParameter(String name) {
+        return parameters.get(name);
+    }
+
+    public Integer getIntParameter(String name, int defaultValue) {
+        String stringValue = parameters.get(name);
+        if(stringValue == null || stringValue.trim().length() == 0){
+            return defaultValue;
+        }
+        return Integer.valueOf(stringValue);
+    }
+
     public String getProtocol() {
         return protocol;
     }
@@ -54,5 +66,13 @@ public class URL {
 
     public Map<String, String> getParameters() {
         return parameters;
+    }
+
+    public String getApplication() {
+        return application;
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

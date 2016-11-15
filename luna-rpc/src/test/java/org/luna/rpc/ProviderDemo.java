@@ -26,7 +26,7 @@ public class ProviderDemo {
         serviceConfig.setRef(new DemoServiceImpl());
         serviceConfig.setVersion("1.0");
         serviceConfig.addProtocol(lunaProtocol);
-        serviceConfig.addProtocol(dubboProtocol);
+//        serviceConfig.addProtocol(dubboProtocol);
 
         serviceConfig.export();
 
