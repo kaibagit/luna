@@ -6,11 +6,11 @@ import org.luna.rpc.transport.TransportBuffer;
 /**
  * Created by luliru on 2016/11/15.
  */
-public class NettyTransportbuffer implements TransportBuffer {
+public class NettyTransportBuffer implements TransportBuffer {
 
     private ByteBuf byteBuf;
 
-    public NettyTransportbuffer(ByteBuf byteBuf){
+    public NettyTransportBuffer(ByteBuf byteBuf){
         this.byteBuf = byteBuf;
 //        byteBuf.getBytes()
     }

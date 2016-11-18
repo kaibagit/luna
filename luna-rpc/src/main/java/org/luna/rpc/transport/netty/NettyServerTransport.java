@@ -40,7 +40,7 @@ public class NettyServerTransport implements ServerTransport {
     @Override
     public synchronized void start() {
         try{
-            Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.name()));
+            Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.getName(),URLParamType.codec.getValue()));
             ChannelInitializer<SocketChannel> channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
@@ -51,13 +51,13 @@ public class NettyServerTransport implements ServerTransport {
                 }
             };
 
-            EventLoopGroup bossGroup = new NioEventLoopGroup();
-            EventLoopGroup workerGroup = new NioEventLoopGroup();
+            EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+            EventLoopGroup workerGroup = new NioEventLoopGroup();   //默认是CPU核数的2倍
             serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(channelChannelInitializer)
-                    .bind(url.getPort()).sync().channel().closeFuture().sync();
+                    .bind(url.getPort()).sync();
             System.out.println("==========");
         }catch (Exception e){
             throw new LunaRpcException("NettyServerTransport start fail .",e);
@@ -66,7 +66,8 @@ public class NettyServerTransport implements ServerTransport {
 
     @Override
     public void destory() {
-
+        serverBootstrap.group().shutdownGracefully();
+        serverBootstrap.childGroup().shutdownGracefully();
     }
 
     @Override

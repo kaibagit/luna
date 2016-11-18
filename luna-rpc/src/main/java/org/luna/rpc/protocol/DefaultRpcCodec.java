@@ -8,16 +8,20 @@ import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Invocation;
 import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.URL;
 import org.luna.rpc.core.buildin.DefaultRpcInvocation;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.core.extension.Spi;
 import org.luna.rpc.serialize.Serialization;
 import org.luna.rpc.transport.Request;
+import org.luna.rpc.transport.Response;
 import org.luna.rpc.transport.Transport;
 import org.luna.rpc.transport.TransportBuffer;
+import org.luna.rpc.util.ByteUtil;
 import org.luna.rpc.util.ReflectUtil;
 
 /**
+ * 默认的RPC编码器
  * Created by luliru on 2016/11/15.
  */
 @Spi(name = "luna")
@@ -39,9 +43,23 @@ public class DefaultRpcCodec implements Codec {
     /** 心跳消息标记，为长连接传输层心跳设计 */
     public static final byte FLAG_HEARTBEAT = 0x04;
 
+    /** 响应状态，调用成功 */
+    public static final byte STATUS_OK = 0x00;
+
+    /** 响应状态《调用抛出异常 */
+    public static final byte STATUS_EXCEPTION = 0x03;
+
     @Override
     public byte[] encode(Transport transport, Object message) throws IOException {
-        return new byte[0];
+        byte[] bytes = null;
+        if(message instanceof Request){
+            Request request = (Request)message;
+            bytes = encodeRequest(transport,request);
+        }else{
+            Response response = (Response)message;
+            bytes = encodeResponse(transport,response);
+        }
+        return bytes;
     }
 
     @Override
@@ -70,7 +88,7 @@ public class DefaultRpcCodec implements Codec {
                 byte[] body = new byte[bodyLength];
                 buffer.getBytes(128,body,0,bodyLength);
                 try {
-                    Invocation invocation = decodeBody(transport,body);
+                    Invocation invocation = decodeRequestBody(transport,body);
                     request.setData(invocation);
                 } catch (ClassNotFoundException e) {
                     throw new LunaRpcException("Class not find",e);
@@ -78,13 +96,136 @@ public class DefaultRpcCodec implements Codec {
             }
             return request;
         }else{
-
+            long messageId = buffer.getLong(32);
+            Response response = new Response(messageId);
+            if( (flag & FLAG_HEARTBEAT) != 0 ){
+                response.setHeartbeat(true);
+            }else{
+                byte status = buffer.getByte(24);
+                byte[] body = new byte[bodyLength];
+                buffer.getBytes(128,body,0,bodyLength);
+                try{
+                    Object result = decodeResponseValue(transport,body);
+                    if( (status & STATUS_OK) == STATUS_OK){
+                        response.setValue(result);
+                    }else{
+                        response.setException((Exception)result);
+                    }
+                }catch (ClassNotFoundException e){
+                    throw new LunaRpcException("Class not find",e);
+                }
+            }
+            return response;
         }
-
-        return null;
     }
 
-    private Invocation decodeBody(Transport transport,byte[] body) throws IOException, ClassNotFoundException {
+    private byte[] encodeRequest(Transport transport, Request request) throws IOException {
+        byte[] body = null;
+
+        if(request.isHeartbeat()){
+            body = new byte[0];
+        }else{
+            URL url = transport.getUrl();
+            Invocation invocation = (Invocation) request.getData();
+            Serialization serialization = ExtensionLoader.getExtension(
+                    Serialization.class,
+                    transport.getUrl().getParameter(URLParamType.serialize.name())
+            );
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ObjectOutput output = createOutput(outputStream);
+            output.writeUTF(url.getApplication());
+            output.writeUTF(url.getService());
+            output.writeUTF(url.getVersion());
+            output.writeUTF(invocation.getMethodName());
+            output.writeUTF(ReflectUtil.getMethodParamDesc(invocation.getParameterTypes()));
+            for(Object o : invocation.getArguments()){
+                output.writeObject(serialization.serialize(o));
+            }
+
+            body = outputStream.toByteArray();
+        }
+        int messageLength = HEAD_LENGTH + body.length;
+        byte[] message = new byte[messageLength];
+        int offset = 0;
+
+        byte flag = FLAG_REQUEST;
+        if(request.isOneway()){
+            flag += FLAG_ONEWAY;
+        }
+        if(request.isHeartbeat()){
+            flag += FLAG_HEARTBEAT;
+        }
+
+        ByteUtil.short2bytes(MAGIC,message,offset);
+        offset += 2;
+
+        message[offset] = flag;
+        offset ++;
+
+        offset ++;  //skip status
+
+        ByteUtil.long2bytes(request.getMessageId(),message,offset);
+        offset += 8;
+
+        ByteUtil.int2bytes(body.length,message,offset);
+        offset += 4;
+
+        System.arraycopy(body,0,message,offset,body.length);
+        return message;
+    }
+
+    private byte[] encodeResponse(Transport transport,Response response) throws IOException {
+        byte[] body = null;
+        if(response.isHeartbeat()){
+            body = new byte[0];
+        }else{
+            Serialization serialization = ExtensionLoader.getExtension(
+                    Serialization.class,
+                    transport.getUrl().getParameter(URLParamType.serialize.name())
+            );
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ObjectOutput output = createOutput(outputStream);
+            output.writeObject(response.getValue().getClass());
+            output.writeObject(serialization.serialize(response.getValue()));
+
+            body = outputStream.toByteArray();
+        }
+
+        int messageLength = HEAD_LENGTH + body.length;
+        byte[] message = new byte[messageLength];
+        int offset = 0;
+
+        byte flag = FLAG_RESPONSE;
+        if(response.isHeartbeat()){
+            flag += FLAG_HEARTBEAT;
+        }
+
+        byte status = STATUS_OK;
+        if(response.getException() != null){
+            status = STATUS_EXCEPTION;
+        }
+
+        ByteUtil.short2bytes(MAGIC,message,offset);
+        offset += 2;
+
+        message[offset] = flag;
+        offset ++;
+
+        message[offset] = status;
+        offset ++;
+
+        ByteUtil.long2bytes(response.getMessageId(),message,offset);
+        offset += 8;
+
+        ByteUtil.int2bytes(body.length,message,offset);
+        offset += 4;
+
+        System.arraycopy(body,0,message,offset,body.length);
+        return message;
+    }
+
+    private Invocation decodeRequestBody(Transport transport, byte[] body) throws IOException, ClassNotFoundException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(body);
         ObjectInput input = createInput(inputStream);
 
@@ -120,11 +261,35 @@ public class DefaultRpcCodec implements Codec {
         return invocation;
     }
 
-    public ObjectInput createInput(InputStream in) {
+    private Object decodeResponseValue(Transport transport, byte[] body) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(body);
+        ObjectInput input = createInput(inputStream);
+
+        Serialization serialization = ExtensionLoader.getExtension(
+                Serialization.class,
+                transport.getUrl().getParameter(URLParamType.serialize.name())
+        );
+
+        String className = input.readUTF();
+        Class<?> clz = ReflectUtil.forName(className);
+
+        Object result = serialization.deserialize((byte[])input.readObject(),clz);
+        return result;
+    }
+
+    private ObjectInput createInput(InputStream in) {
         try {
             return new ObjectInputStream(in);
         } catch (Exception e) {
             throw new LunaRpcException(this.getClass().getSimpleName() + " createInput error", e);
+        }
+    }
+
+    private ObjectOutput createOutput(OutputStream out){
+        try{
+            return new ObjectOutputStream(out);
+        }catch (Exception e){
+            throw new LunaRpcException(this.getClass().getSimpleName() + " createOutput error",e);
         }
     }
 

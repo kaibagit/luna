@@ -71,6 +71,27 @@ public class ReflectUtil {
     }
 
     /**
+     * 获取method方式的接口参数，以逗号分割，拼接clz列表。 如果没有参数，那么void表示
+     *
+     * @param parameterTypes
+     * @return
+     */
+    public static String getMethodParamDesc(Class<?>[] parameterTypes) {
+        if(parameterTypes == null || parameterTypes.length == 0){
+            return EMPTY_PARAM;
+        }
+
+        StringBuilder builder = new StringBuilder();
+
+        for (Class<?> clz : parameterTypes) {
+            String className = getName(clz);
+            builder.append(className).append(PARAM_CLASS_SPLIT);
+        }
+
+        return builder.substring(0, builder.length() - 1);
+    }
+
+    /**
      * 获取方法的标示 : method_name + "(" + paramDesc + ")"
      * 
      * @param method

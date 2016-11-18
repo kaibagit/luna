@@ -8,4 +8,6 @@ import org.luna.rpc.core.URL;
 public interface TransportFactory {
 
     ServerTransport createServerTransport(URL url, MessageHandler messageHandler);
+
+    ClientTransport createClientTransport(URL url);
 }

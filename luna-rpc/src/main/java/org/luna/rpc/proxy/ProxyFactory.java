@@ -14,9 +14,4 @@ public interface ProxyFactory {
      * create proxy.
      */
     <T> T getProxy(Class<T> clz,Client<T> client) throws LunaRpcException;
-
-    /**
-     * create invoker.
-     */
-    <T> Invoker<T> getInvoker(T proxy, Class<T> clz, URL url) throws LunaRpcException;
 }

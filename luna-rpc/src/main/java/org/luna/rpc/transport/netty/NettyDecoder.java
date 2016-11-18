@@ -29,7 +29,7 @@ public class NettyDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if(transportBuffer == null){
-            transportBuffer = new NettyTransportbuffer(in);
+            transportBuffer = new NettyTransportBuffer(in);
         }
         Object decodeResult = codec.decode(transport,transportBuffer);
         if(decodeResult == null){

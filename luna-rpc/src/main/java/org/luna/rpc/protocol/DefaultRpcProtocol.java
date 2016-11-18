@@ -1,12 +1,11 @@
 package org.luna.rpc.protocol;
 
-import org.luna.rpc.core.Client;
-import org.luna.rpc.core.Exporter;
-import org.luna.rpc.core.Invoker;
-import org.luna.rpc.core.URL;
+import org.luna.rpc.core.*;
 import org.luna.rpc.core.buildin.DefaultMessageHandler;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.core.extension.Spi;
+import org.luna.rpc.proxy.ProxyFactory;
+import org.luna.rpc.transport.ClientTransport;
 import org.luna.rpc.transport.ServerTransport;
 import org.luna.rpc.transport.TransportFactory;
 
@@ -27,7 +26,9 @@ public class DefaultRpcProtocol implements Protocol {
 
     @Override
     public <T> Client<T> refer(Class<T> clz, URL url) {
-        return null;
+        Client<T> client = new DefaultRpcClient<T>(clz,url);
+        client.start();
+        return client;
     }
 
     class DefaultRpcExporter<T> implements Exporter<T>{
@@ -42,8 +43,7 @@ public class DefaultRpcProtocol implements Protocol {
             this.invoker = invoker;
             messageHandler.addInvoker(invoker);
 
-            transportFactory =
-                    ExtensionLoader.getExtension(TransportFactory.class);
+            transportFactory = ExtensionLoader.getExtension(TransportFactory.class);
             serverTransport = transportFactory.createServerTransport(url, messageHandler);
         }
 
@@ -60,6 +60,42 @@ public class DefaultRpcProtocol implements Protocol {
         @Override
         public void start() {
             serverTransport.start();
+        }
+
+        @Override
+        public void destory() {
+
+        }
+    }
+
+    class DefaultRpcClient<T> implements Client<T>{
+
+        private URL url;
+
+        private TransportFactory transportFactory;
+
+        private ClientTransport clientTransport;
+
+        public DefaultRpcClient(Class<T> clz, URL url){
+            this.url = url;
+            transportFactory = ExtensionLoader.getExtension(TransportFactory.class);
+            clientTransport = transportFactory.createClientTransport(url);
+        }
+
+        @Override
+        public URL getUrl() {
+            return url;
+        }
+
+        @Override
+        public Result call(Invocation invocation) {
+
+            return null;
+        }
+
+        @Override
+        public void start() {
+            clientTransport.start();
         }
 
         @Override

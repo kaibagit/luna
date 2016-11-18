@@ -40,6 +40,14 @@ public class URL {
         return parameters.get(name);
     }
 
+    public String getParameter(String name,String defaultValue){
+        String stringValue = parameters.get(name);
+        if(stringValue == null || stringValue.trim().length() == 0){
+            return defaultValue;
+        }
+        return stringValue;
+    }
+
     public Integer getIntParameter(String name, int defaultValue) {
         String stringValue = parameters.get(name);
         if(stringValue == null || stringValue.trim().length() == 0){

@@ -62,6 +62,11 @@ public class FilterWrapperProtocol implements Protocol {
             final Client tempClient = lastClient;
             lastClient = new Client<T>() {
                 @Override
+                public URL getUrl() {
+                    return url;
+                }
+
+                @Override
                 public Result call(Invocation invocation) {
                     return filter.filter(tempClient,invocation);
                 }
