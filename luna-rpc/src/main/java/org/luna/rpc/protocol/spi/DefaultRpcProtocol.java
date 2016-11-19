@@ -1,13 +1,12 @@
-package org.luna.rpc.protocol;
+package org.luna.rpc.protocol.spi;
 
 import org.luna.rpc.core.*;
 import org.luna.rpc.core.buildin.DefaultMessageHandler;
+import org.luna.rpc.core.buildin.DefaultRpcResult;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.core.extension.Spi;
-import org.luna.rpc.proxy.ProxyFactory;
-import org.luna.rpc.transport.ClientTransport;
-import org.luna.rpc.transport.ServerTransport;
-import org.luna.rpc.transport.TransportFactory;
+import org.luna.rpc.protocol.Protocol;
+import org.luna.rpc.transport.*;
 
 /**
  * Created by luliru on 2016/11/1.
@@ -64,7 +63,7 @@ public class DefaultRpcProtocol implements Protocol {
 
         @Override
         public void destory() {
-
+            serverTransport.destory();
         }
     }
 
@@ -89,8 +88,14 @@ public class DefaultRpcProtocol implements Protocol {
 
         @Override
         public Result call(Invocation invocation) {
+            Request request = new Request();
+            request.setData(invocation);
+            Response response = clientTransport.send(request);
 
-            return null;
+            DefaultRpcResult result = new DefaultRpcResult();
+            result.setException(response.getException());
+            result.setValue(response.getValue());
+            return result;
         }
 
         @Override
@@ -100,7 +105,7 @@ public class DefaultRpcProtocol implements Protocol {
 
         @Override
         public void destory() {
-
+            clientTransport.destory();
         }
     }
 

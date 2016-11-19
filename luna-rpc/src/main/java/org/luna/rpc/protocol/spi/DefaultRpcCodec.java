@@ -1,4 +1,4 @@
-package org.luna.rpc.protocol;
+package org.luna.rpc.protocol.spi;
 
 import java.io.*;
 import java.util.HashMap;

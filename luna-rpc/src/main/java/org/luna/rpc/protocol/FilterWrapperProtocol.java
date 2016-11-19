@@ -4,6 +4,7 @@ import org.luna.rpc.core.*;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.filter.Filter;
 import org.luna.rpc.filter.FilterComparator;
+import org.luna.rpc.protocol.Protocol;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +62,16 @@ public class FilterWrapperProtocol implements Protocol {
         for(Filter filter : filters){
             final Client tempClient = lastClient;
             lastClient = new Client<T>() {
+                @Override
+                public void start() {
+                    tempClient.start();
+                }
+
+                @Override
+                public void destory() {
+                    tempClient.destory();
+                }
+
                 @Override
                 public URL getUrl() {
                     return url;

@@ -14,6 +14,11 @@ import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.transport.ClientTransport;
+import org.luna.rpc.transport.Request;
+import org.luna.rpc.transport.Response;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by luliru on 2016/11/18.
@@ -24,7 +29,10 @@ public class NettyClientTransport implements ClientTransport {
 
     private EventLoopGroup group;
 
-    private Channel ch;
+    private Channel channel;
+
+    // 客户端请求回调Map，key值为messageId
+    private ConcurrentMap<Long, NettyResponseFuture> callbackMap = new ConcurrentHashMap<>();
 
     public NettyClientTransport(URL url){
         this.url = url;
@@ -45,7 +53,7 @@ public class NettyClientTransport implements ClientTransport {
                     ChannelPipeline pipeline = ch.pipeline();
                     pipeline.addLast("decoder", new NettyDecoder(NettyClientTransport.this,codec));
                     pipeline.addLast("encoder", new NettyEncoder(NettyClientTransport.this,codec));
-//                    pipeline.addLast("handler", new NettyMessageHandler(NettyClientTransport.this,messageHandler));
+                    pipeline.addLast("handler",new NettyCallbackHandler(NettyClientTransport.this));
                 }
             };
             group = new NioEventLoopGroup();
@@ -53,7 +61,7 @@ public class NettyClientTransport implements ClientTransport {
             b.group(group).channel(NioSocketChannel.class)
                     .handler(channelChannelInitializer);
 
-            ch = b.connect(url.getHost(), url.getPort()).sync().channel();
+            channel = b.connect(url.getHost(), url.getPort()).sync().channel();
         }catch (Exception e){
             throw new LunaRpcException("NettyClientTransport start error .",e);
         }
@@ -62,5 +70,18 @@ public class NettyClientTransport implements ClientTransport {
     @Override
     public void destory() {
         group.shutdownGracefully();
+    }
+
+    @Override
+    public Response send(Request request) {
+        NettyResponseFuture response = new NettyResponseFuture(request.getMessageId());
+        callbackMap.put(request.getMessageId(),response);
+        channel.writeAndFlush(request);
+        response.getValue();    //阻塞直到获取返回值
+        return response;
+    }
+
+    public NettyResponseFuture removeCallback(long messageId) {
+        return callbackMap.remove(messageId);
     }
 }
