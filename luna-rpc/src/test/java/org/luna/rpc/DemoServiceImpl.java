@@ -5,6 +5,7 @@ package org.luna.rpc;
  */
 public class DemoServiceImpl implements DemoService {
     public String hello(String id) {
+        System.out.println("hello"+id);
         return "hello"+id;
     }
 }

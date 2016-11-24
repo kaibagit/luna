@@ -14,10 +14,24 @@ public class NettyResponseFuture extends Response {
     }
 
     public Object getValue(){
-        if(done){
-            
+        if(!done){
+            try {
+                synchronized (this){
+                    this.wait();
+                }
+            } catch (InterruptedException e) {
+            }
         }
         return super.getValue();
+    }
+
+    public void complete(Response response){
+        setValue(response.getValue());
+        setException(response.getException());
+        done = true;
+        synchronized (this){
+            this.notifyAll();
+        }
     }
 
     public Exception getException(){

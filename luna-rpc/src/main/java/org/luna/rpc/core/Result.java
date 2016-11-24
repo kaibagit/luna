@@ -17,7 +17,7 @@ public interface Result {
      *
      * @return exception. if no exception return null.
      */
-    Throwable getException();
+    Exception getException();
 
     /**
      * Has exception.

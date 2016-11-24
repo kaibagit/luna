@@ -3,6 +3,7 @@ package org.luna.rpc.core.buildin;
 import org.luna.rpc.core.Invocation;
 import org.luna.rpc.core.Invoker;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,7 +23,7 @@ public class DefaultRpcInvocation implements Invocation {
 
     private Object[] arguments;
 
-    private Map<String, String> attachments;
+    private Map<String, String> attachments = new HashMap<>();
 
     @Override
     public String getApplication() {
@@ -41,32 +42,36 @@ public class DefaultRpcInvocation implements Invocation {
 
     @Override
     public String getMethodName() {
-        return null;
+        return methodName;
     }
 
     @Override
     public Class<?>[] getParameterTypes() {
-        return new Class<?>[0];
+        return parameterTypes;
     }
 
     @Override
     public Object[] getArguments() {
-        return new Object[0];
+        return arguments;
     }
 
     @Override
     public Map<String, String> getAttachments() {
-        return null;
+        return attachments;
     }
 
     @Override
     public String getAttachment(String key) {
-        return null;
+        return attachments.get(key);
     }
 
     @Override
     public String getAttachment(String key, String defaultValue) {
-        return null;
+        String value = attachments.get(key);
+        if(value == null){
+            value = defaultValue;
+        }
+        return value;
     }
 
     public void setApplication(String application) {

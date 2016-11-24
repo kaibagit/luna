@@ -9,11 +9,11 @@ public class DefaultRpcResult implements Result {
 
     private Object value;
 
-    private Throwable exception;
+    private Exception exception;
 
     @Override
     public Object getValue() {
-        return null;
+        return value;
     }
 
     public void setValue(Object value) {
@@ -21,11 +21,11 @@ public class DefaultRpcResult implements Result {
     }
 
     @Override
-    public Throwable getException() {
-        return null;
+    public Exception getException() {
+        return exception;
     }
 
-    public void setException(Throwable exception) {
+    public void setException(Exception exception) {
         this.exception = exception;
     }
 

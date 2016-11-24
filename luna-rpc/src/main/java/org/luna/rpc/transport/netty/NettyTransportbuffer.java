@@ -12,7 +12,6 @@ public class NettyTransportBuffer implements TransportBuffer {
 
     public NettyTransportBuffer(ByteBuf byteBuf){
         this.byteBuf = byteBuf;
-//        byteBuf.getBytes()
     }
 
 
@@ -23,6 +22,8 @@ public class NettyTransportBuffer implements TransportBuffer {
 
     @Override
     public short getShort(int index) {
+        byte[] bs = new byte[16];
+        byteBuf.getBytes(0,bs,0,16);
         return byteBuf.getShort(index);
     }
 

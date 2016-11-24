@@ -26,6 +26,6 @@ public class LunaRpcUtil {
      * @return
      */
     public static String getUniqueServiceDecription(URL url){
-        return String.format("%s/%s/%s",url.getService(),url.getApplication(),url.getService(),url.getVersion());
+        return String.format("%s/%s/%s",url.getApplication(),url.getService(),url.getVersion());
     }
 }

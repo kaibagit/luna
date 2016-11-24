@@ -58,6 +58,9 @@ public class DefaultInvoker<T> implements Invoker<T> {
     }
 
     private Method findMethod(Invocation invocation) throws NoSuchMethodException {
+        if(invocation.getParameterTypes().length == 0){
+            return clz.getMethod(invocation.getMethodName());
+        }
         return clz.getMethod(invocation.getMethodName(),invocation.getParameterTypes());
     }
 }

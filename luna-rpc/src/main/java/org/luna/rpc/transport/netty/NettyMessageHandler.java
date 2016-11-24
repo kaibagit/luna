@@ -29,7 +29,8 @@ public class NettyMessageHandler extends ChannelInboundHandlerAdapter {
                 if(request.isHeartbeat()){
 
                 }else{
-                    messageHandler.handle(transport,request);
+                    Object result = messageHandler.handle(transport,request);
+                    ctx.writeAndFlush(result);
                 }
             }else{
                 throw new LunaRpcException("Unsupported message type : "+msg.getClass().getName());
@@ -37,6 +38,12 @@ public class NettyMessageHandler extends ChannelInboundHandlerAdapter {
         } finally {
             ReferenceCountUtil.release(msg);
         }
+    }
+
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+            throws Exception {
+        cause.printStackTrace();
+//        ctx.fireExceptionCaught(cause);
     }
 
 }

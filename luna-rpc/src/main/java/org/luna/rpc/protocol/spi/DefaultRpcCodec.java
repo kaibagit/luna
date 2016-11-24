@@ -29,7 +29,7 @@ public class DefaultRpcCodec implements Codec {
 
     public static final short MAGIC = (short) 0x100a;
 
-    public static final int HEAD_LENGTH = 160;
+    public static final int HEAD_LENGTH = 16;
 
     /** 请求消息标记 */
     public static final byte FLAG_REQUEST = 0x00;
@@ -70,14 +70,14 @@ public class DefaultRpcCodec implements Codec {
         if(buffer.getShort(0) != MAGIC){
             throw new LunaRpcException("not support message magic");
         }
-        int bodyLength = buffer.getInt(96);
+        int bodyLength = buffer.getInt(12);
         if(buffer.readableBytes() < HEAD_LENGTH + bodyLength){
             return null;
         }
 
-        byte flag = buffer.getByte(16);
+        byte flag = buffer.getByte(2);
         if( (flag & FLAG_RESPONSE) == 0){
-            long messageId = buffer.getLong(32);
+            long messageId = buffer.getLong(4);
             Request request = new Request(messageId);
             if( (flag & FLAG_ONEWAY) != 0){
                 request.setOneway(true);
@@ -86,7 +86,7 @@ public class DefaultRpcCodec implements Codec {
                 request.setHeartbeat(true);
             }else{
                 byte[] body = new byte[bodyLength];
-                buffer.getBytes(128,body,0,bodyLength);
+                buffer.getBytes(HEAD_LENGTH,body,0,bodyLength);
                 try {
                     Invocation invocation = decodeRequestBody(transport,body);
                     request.setData(invocation);
@@ -96,16 +96,16 @@ public class DefaultRpcCodec implements Codec {
             }
             return request;
         }else{
-            long messageId = buffer.getLong(32);
+            long messageId = buffer.getLong(4);
             Response response = new Response(messageId);
             if( (flag & FLAG_HEARTBEAT) != 0 ){
                 response.setHeartbeat(true);
             }else{
-                byte status = buffer.getByte(24);
+                byte status = buffer.getByte(3);
                 byte[] body = new byte[bodyLength];
-                buffer.getBytes(128,body,0,bodyLength);
+                buffer.getBytes(HEAD_LENGTH,body,0,bodyLength);
                 try{
-                    Object result = decodeResponseValue(transport,body);
+                    Object result = decodeResponseBody(transport,body);
                     if( (status & STATUS_OK) == STATUS_OK){
                         response.setValue(result);
                     }else{
@@ -127,9 +127,10 @@ public class DefaultRpcCodec implements Codec {
         }else{
             URL url = transport.getUrl();
             Invocation invocation = (Invocation) request.getData();
+            String serializationName = transport.getUrl().getParameter(URLParamType.serialize.name());
             Serialization serialization = ExtensionLoader.getExtension(
                     Serialization.class,
-                    transport.getUrl().getParameter(URLParamType.serialize.name())
+                    serializationName != null ? serializationName : URLParamType.serialize.getValue()
             );
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -142,6 +143,13 @@ public class DefaultRpcCodec implements Codec {
             for(Object o : invocation.getArguments()){
                 output.writeObject(serialization.serialize(o));
             }
+            output.writeInt(invocation.getAttachments().size());
+            for(Map.Entry<String,String> entry : invocation.getAttachments().entrySet()){
+                output.writeUTF(entry.getKey());
+                output.writeUTF(entry.getValue());
+            }
+
+            output.close();
 
             body = outputStream.toByteArray();
         }
@@ -180,14 +188,16 @@ public class DefaultRpcCodec implements Codec {
         if(response.isHeartbeat()){
             body = new byte[0];
         }else{
+            String serializationName = transport.getUrl().getParameter(URLParamType.serialize.name());
             Serialization serialization = ExtensionLoader.getExtension(
                     Serialization.class,
-                    transport.getUrl().getParameter(URLParamType.serialize.name())
+                    serializationName != null ? serializationName : URLParamType.serialize.getValue()
             );
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ObjectOutput output = createOutput(outputStream);
             output.writeObject(response.getValue().getClass());
             output.writeObject(serialization.serialize(response.getValue()));
+            output.close();
 
             body = outputStream.toByteArray();
         }
@@ -236,9 +246,10 @@ public class DefaultRpcCodec implements Codec {
         String paramtersDesc = input.readUTF();
 
         DefaultRpcInvocation invocation = new DefaultRpcInvocation();
+        String serializationName = transport.getUrl().getParameter(URLParamType.serialize.name());
         Serialization serialization = ExtensionLoader.getExtension(
                 Serialization.class,
-                transport.getUrl().getParameter(URLParamType.serialize.name())
+                serializationName != null ? serializationName : URLParamType.serialize.getValue()
         );
 
         invocation.setApplication(application);
@@ -261,13 +272,14 @@ public class DefaultRpcCodec implements Codec {
         return invocation;
     }
 
-    private Object decodeResponseValue(Transport transport, byte[] body) throws IOException, ClassNotFoundException {
+    private Object decodeResponseBody(Transport transport, byte[] body) throws IOException, ClassNotFoundException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(body);
         ObjectInput input = createInput(inputStream);
 
+        String serializationName = transport.getUrl().getParameter(URLParamType.serialize.name());
         Serialization serialization = ExtensionLoader.getExtension(
                 Serialization.class,
-                transport.getUrl().getParameter(URLParamType.serialize.name())
+                serializationName != null ? serializationName : URLParamType.serialize.getValue()
         );
 
         String className = input.readUTF();
@@ -295,10 +307,6 @@ public class DefaultRpcCodec implements Codec {
 
     private Map<String, String> decodeRequestAttachments(ObjectInput input) throws IOException, ClassNotFoundException {
         int size = input.readInt();
-
-        if (size <= 0) {
-            return null;
-        }
 
         Map<String, String> attachments = new HashMap<String, String>();
 
