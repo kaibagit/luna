@@ -106,7 +106,7 @@ public class DefaultRpcCodec implements Codec {
                 buffer.getBytes(HEAD_LENGTH,body,0,bodyLength);
                 try{
                     Object result = decodeResponseBody(transport,body);
-                    if( (status & STATUS_OK) == STATUS_OK){
+                    if( status == STATUS_OK){
                         response.setValue(result);
                     }else{
                         response.setException((Exception)result);
@@ -195,7 +195,7 @@ public class DefaultRpcCodec implements Codec {
             );
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ObjectOutput output = createOutput(outputStream);
-            output.writeObject(response.getValue().getClass());
+            output.writeUTF(response.getValue().getClass().getName());
             output.writeObject(serialization.serialize(response.getValue()));
             output.close();
 

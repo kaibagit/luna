@@ -35,6 +35,14 @@ public class NettyResponseFuture extends Response {
     }
 
     public Exception getException(){
+        if(!done){
+            try {
+                synchronized (this){
+                    this.wait();
+                }
+            } catch (InterruptedException e) {
+            }
+        }
         return super.getException();
     }
 

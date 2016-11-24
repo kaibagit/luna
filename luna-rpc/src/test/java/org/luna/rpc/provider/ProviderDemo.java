@@ -1,5 +1,6 @@
-package org.luna.rpc;
+package org.luna.rpc.provider;
 
+import org.luna.rpc.api.DemoService;
 import org.luna.rpc.config.ApplicationConfig;
 import org.luna.rpc.config.ProtocolConfig;
 import org.luna.rpc.config.ServiceConfig;

@@ -1,5 +1,6 @@
-package org.luna.rpc;
+package org.luna.rpc.consumer;
 
+import org.luna.rpc.api.DemoService;
 import org.luna.rpc.config.ProtocolConfig;
 import org.luna.rpc.config.ReferenceConfig;
 
@@ -23,7 +24,9 @@ public class ConsumerDemo {
         referenceConfig.setProtocol(protocol);
 
         DemoService demoService = referenceConfig.getRef();
-        demoService.hello("luna");
+        System.out.println(demoService.getById(1));
+        System.out.println(demoService.hello("luna"));
+        demoService.hello();
 
 
     }
