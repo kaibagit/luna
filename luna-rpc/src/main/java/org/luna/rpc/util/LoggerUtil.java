@@ -11,6 +11,8 @@ public class LoggerUtil {
 
     private static Logger error = LoggerFactory.getLogger("error");
 
+    private static Logger info = LoggerFactory.getLogger("info");
+
     public static void error(String msg) {
         error.error(msg);
     }
@@ -21,5 +23,9 @@ public class LoggerUtil {
 
     public static void error(String msg, Throwable t) {
         error.error(msg, t);
+    }
+
+    public static void info(String msg) {
+        info.info(msg);
     }
 }

@@ -15,6 +15,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.luna.rpc.util.LoggerUtil;
 
 /**
  * Created by luliru on 2016/11/12.
@@ -27,6 +28,8 @@ public class NettyServerTransport implements ServerTransport {
 
     private ServerBootstrap serverBootstrap;
 
+    private volatile boolean started = false;
+
     public NettyServerTransport(URL url, MessageHandler messageHandler) {
         this.url = url;
         this.messageHandler = new WrappedMessageHandler(messageHandler);
@@ -34,6 +37,9 @@ public class NettyServerTransport implements ServerTransport {
 
     @Override
     public synchronized void start() {
+        if(started){
+            return;
+        }
         try{
             Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.getName(),URLParamType.codec.getValue()));
             ChannelInitializer<SocketChannel> channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
@@ -54,7 +60,8 @@ public class NettyServerTransport implements ServerTransport {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(channelChannelInitializer)
                     .bind(url.getPort()).sync();
-            System.out.println("==========");
+            started = true;
+            LoggerUtil.info("NettyServerTransport started.");
         }catch (Exception e){
             throw new LunaRpcException("NettyServerTransport start fail .",e);
         }

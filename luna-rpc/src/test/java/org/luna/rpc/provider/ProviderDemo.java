@@ -1,6 +1,7 @@
 package org.luna.rpc.provider;
 
 import org.luna.rpc.api.DemoService;
+import org.luna.rpc.api.MemberService;
 import org.luna.rpc.config.ApplicationConfig;
 import org.luna.rpc.config.ProtocolConfig;
 import org.luna.rpc.config.ServiceConfig;
@@ -29,7 +30,15 @@ public class ProviderDemo {
         serviceConfig.addProtocol(lunaProtocol);
 //        serviceConfig.addProtocol(dubboProtocol);
 
+        ServiceConfig<MemberService> serviceConfig2 = new ServiceConfig<MemberService>();
+        serviceConfig2.setApplication(applicationConfig);
+        serviceConfig2.setServiceClass(MemberService.class);
+        serviceConfig2.setRef(new MemberServiceImpl());
+        serviceConfig2.setVersion("1.0");
+        serviceConfig2.addProtocol(lunaProtocol);
+
         serviceConfig.export();
+        serviceConfig2.export();
 
         System.out.println("server start...");
     }
