@@ -43,6 +43,7 @@ public class NettyServerTransport implements ServerTransport {
                     pipeline.addLast("decoder", new NettyDecoder(NettyServerTransport.this,codec));
                     pipeline.addLast("encoder", new NettyEncoder(NettyServerTransport.this,codec));
                     pipeline.addLast("handler", new NettyMessageHandler(NettyServerTransport.this,messageHandler));
+                    pipeline.addLast("errorHandler",new ExceptionHandler());
                 }
             };
 

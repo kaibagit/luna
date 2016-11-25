@@ -14,5 +14,8 @@ public interface TransportBuffer {
     long  getLong(int index);
 
     byte  getByte(int index);
+
+    TransportBuffer readBytes(int length);
+
     TransportBuffer getBytes(int index, byte[] dst, int dstIndex, int length);
 }

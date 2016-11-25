@@ -19,8 +19,6 @@ public class NettyDecoder extends ByteToMessageDecoder {
 
     private Transport transport;
 
-    private TransportBuffer transportBuffer;
-
     public NettyDecoder(Transport transport, Codec codec){
         this.transport = transport;
         this.codec = codec;
@@ -28,9 +26,7 @@ public class NettyDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if(transportBuffer == null){
-            transportBuffer = new NettyTransportBuffer(in);
-        }
+        TransportBuffer transportBuffer = new NettyTransportBuffer(in);
         Object decodeResult = codec.decode(transport,transportBuffer);
         if(decodeResult == null){
             return;

@@ -54,6 +54,7 @@ public class NettyClientTransport implements ClientTransport {
                     pipeline.addLast("decoder", new NettyDecoder(NettyClientTransport.this,codec));
                     pipeline.addLast("encoder", new NettyEncoder(NettyClientTransport.this,codec));
                     pipeline.addLast("handler",new NettyCallbackHandler(NettyClientTransport.this));
+                    pipeline.addLast("errorHandler",new ExceptionHandler());
                 }
             };
             group = new NioEventLoopGroup();

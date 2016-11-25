@@ -19,9 +19,9 @@ public class DefaultRpcInvocation implements Invocation {
 
     private String methodName;
 
-    private Class<?>[] parameterTypes;
+    private Class<?>[] parameterTypes = new Class<?>[0];
 
-    private Object[] arguments;
+    private Object[] arguments = new Object[0];
 
     private Map<String, String> attachments = new HashMap<>();
 
@@ -91,14 +91,20 @@ public class DefaultRpcInvocation implements Invocation {
     }
 
     public void setParameterTypes(Class<?>[] parameterTypes) {
-        this.parameterTypes = parameterTypes;
+        if(parameterTypes != null && parameterTypes.length > 0){
+            this.parameterTypes = parameterTypes;
+        }
     }
 
     public void setArguments(Object[] arguments) {
-        this.arguments = arguments;
+        if(arguments != null && arguments.length > 0){
+            this.arguments = arguments;
+        }
     }
 
     public void setAttachments(Map<String, String> attachments) {
-        this.attachments = attachments;
+        if(attachments != null && !attachments.isEmpty()){
+            this.attachments = attachments;
+        }
     }
 }

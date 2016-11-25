@@ -22,8 +22,6 @@ public class NettyTransportBuffer implements TransportBuffer {
 
     @Override
     public short getShort(int index) {
-        byte[] bs = new byte[16];
-        byteBuf.getBytes(0,bs,0,16);
         return byteBuf.getShort(index);
     }
 
@@ -41,6 +39,11 @@ public class NettyTransportBuffer implements TransportBuffer {
     public byte getByte(int index) {
         return byteBuf.getByte(index);
     }
+
+    public TransportBuffer readBytes(int length){
+        NettyTransportBuffer buffer = new NettyTransportBuffer(byteBuf.readBytes(length));
+        return buffer;
+    };
 
     @Override
     public TransportBuffer getBytes(int index, byte[] dst, int dstIndex, int length) {

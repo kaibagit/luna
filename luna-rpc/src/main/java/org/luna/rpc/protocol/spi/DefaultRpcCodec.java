@@ -75,6 +75,8 @@ public class DefaultRpcCodec implements Codec {
             return null;
         }
 
+        buffer.readBytes(HEAD_LENGTH);
+
         byte flag = buffer.getByte(2);
         if( (flag & FLAG_RESPONSE) == 0){
             long messageId = buffer.getLong(4);
@@ -94,6 +96,9 @@ public class DefaultRpcCodec implements Codec {
                     throw new LunaRpcException("Class not find",e);
                 }
             }
+
+            buffer.readBytes(bodyLength);
+
             return request;
         }else{
             long messageId = buffer.getLong(4);
@@ -115,6 +120,9 @@ public class DefaultRpcCodec implements Codec {
                     throw new LunaRpcException("Class not find",e);
                 }
             }
+
+            buffer.readBytes(bodyLength);
+
             return response;
         }
     }

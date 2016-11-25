@@ -16,8 +16,6 @@ public class NettyEncoder extends MessageToByteEncoder {
 
     private Codec codec;
 
-    private TransportBuffer transportBuffer;
-
     public NettyEncoder(Transport transport,Codec codec){
         this.transport = transport;
         this.codec = codec;
@@ -25,9 +23,6 @@ public class NettyEncoder extends MessageToByteEncoder {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-        if(transportBuffer == null){
-            transportBuffer = new NettyTransportBuffer(out);
-        }
         byte[] data = codec.encode(transport,msg);
         out.writeBytes(data);
     }
