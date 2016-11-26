@@ -143,9 +143,9 @@ public class DefaultRpcCodec implements Codec {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ObjectOutput output = createOutput(outputStream);
-            output.writeUTF(url.getApplication());
-            output.writeUTF(url.getService());
-            output.writeUTF(url.getVersion());
+            output.writeUTF(invocation.getApplication());
+            output.writeUTF(invocation.getServiceName());
+            output.writeUTF(invocation.getVersion());
             output.writeUTF(invocation.getMethodName());
             output.writeUTF(ReflectUtil.getMethodParamDesc(invocation.getParameterTypes()));
             for(Object o : invocation.getArguments()){
