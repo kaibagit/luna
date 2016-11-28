@@ -46,8 +46,11 @@ public class DefaultRpcCodec implements Codec {
     /** 响应状态，调用成功 */
     public static final byte STATUS_OK = 0x00;
 
-    /** 响应状态《调用抛出异常 */
+    /** 响应状态，调用抛出异常 */
     public static final byte STATUS_EXCEPTION = 0x03;
+
+    /** 响应状态，调用没有返回值 */
+    public static final byte STATUS_VOID = 0x05;
 
     @Override
     public byte[] encode(Transport transport, Object message) throws IOException {
@@ -107,17 +110,19 @@ public class DefaultRpcCodec implements Codec {
                 response.setHeartbeat(true);
             }else{
                 byte status = buffer.getByte(3);
-                byte[] body = new byte[bodyLength];
-                buffer.getBytes(HEAD_LENGTH,body,0,bodyLength);
-                try{
-                    Object result = decodeResponseBody(transport,body);
-                    if( status == STATUS_OK){
-                        response.setValue(result);
-                    }else{
-                        response.setException((Exception)result);
+                if(status != STATUS_VOID){
+                    byte[] body = new byte[bodyLength];
+                    buffer.getBytes(HEAD_LENGTH,body,0,bodyLength);
+                    try{
+                        Object result = decodeResponseBody(transport,body);
+                        if( status == STATUS_OK){
+                            response.setValue(result);
+                        }else{
+                            response.setException((Exception)result);
+                        }
+                    }catch (ClassNotFoundException e){
+                        throw new LunaRpcException("Class not find",e);
                     }
-                }catch (ClassNotFoundException e){
-                    throw new LunaRpcException("Class not find",e);
                 }
             }
 
@@ -193,7 +198,7 @@ public class DefaultRpcCodec implements Codec {
 
     private byte[] encodeResponse(Transport transport,Response response) throws IOException {
         byte[] body = null;
-        if(response.isHeartbeat()){
+        if(response.isHeartbeat() || response.getValue() == null){
             body = new byte[0];
         }else{
             String serializationName = transport.getUrl().getParameter(URLParamType.serialize.name());
@@ -220,7 +225,9 @@ public class DefaultRpcCodec implements Codec {
         }
 
         byte status = STATUS_OK;
-        if(response.getException() != null){
+        if(response.getValue() == null){
+            status = STATUS_VOID;
+        }else if(response.getException() != null){
             status = STATUS_EXCEPTION;
         }
 

@@ -26,10 +26,4 @@ public class NettyEncoder extends MessageToByteEncoder {
         byte[] data = codec.encode(transport,msg);
         out.writeBytes(data);
     }
-
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-            throws Exception {
-        cause.printStackTrace();
-//        ctx.fireExceptionCaught(cause);
-    }
 }
