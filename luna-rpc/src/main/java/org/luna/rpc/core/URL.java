@@ -56,6 +56,14 @@ public class URL {
         return Integer.valueOf(stringValue);
     }
 
+    public Long getLongParameter(String name,long defaultValue){
+        String stringValue = parameters.get(name);
+        if(stringValue == null || stringValue.trim().length() == 0){
+            return defaultValue;
+        }
+        return Long.valueOf(stringValue);
+    }
+
     public String getProtocol() {
         return protocol;
     }

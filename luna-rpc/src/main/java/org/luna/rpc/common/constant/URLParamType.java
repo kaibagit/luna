@@ -9,7 +9,10 @@ public enum URLParamType {
     codec("codec", "luna"),
 
     /** serialize */
-    serialize("serialization", "hessian2");
+    serialize("serialization", "hessian2"),
+
+    /** request timeout **/
+    requestTimeout("requestTimeout", "500");
 
     private String name;
 
@@ -26,5 +29,9 @@ public enum URLParamType {
 
     public String getValue() {
         return value;
+    }
+
+    public long getLongValue() {
+        return Long.valueOf(value);
     }
 }

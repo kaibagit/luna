@@ -1,5 +1,8 @@
 package org.luna.rpc.transport.netty;
 
+import org.luna.rpc.core.Invocation;
+import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.Response;
 
 /**
@@ -9,17 +12,28 @@ public class NettyResponseFuture extends Response {
 
     private volatile boolean done = false;
 
-    public NettyResponseFuture(long messageId) {
-        super(messageId);
+    /** 客户端请求超时时间，单位ms */
+    private long timeout = 0;
+
+    private Request request;
+
+    public NettyResponseFuture(Request request, long timeout) {
+        super(request.getMessageId());
+        this.request = request;
+        this.timeout = timeout;
     }
 
     public Object getValue(){
         if(!done){
             try {
                 synchronized (this){
-                    this.wait();
+                    this.wait(timeout);
                 }
-            } catch (InterruptedException e) {
+            } catch (InterruptedException e) {}
+            if(!done){
+                Invocation invocation = (Invocation) request.getData();
+                String msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",timeout,invocation.getServiceName(),invocation.getMethodName(),invocation.getApplication(),invocation.getVersion());
+                throw new LunaRpcException(msg);
             }
         }
         return super.getValue();

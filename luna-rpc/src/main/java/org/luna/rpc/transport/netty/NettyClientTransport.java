@@ -1,10 +1,7 @@
 package org.luna.rpc.transport.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -75,9 +72,10 @@ public class NettyClientTransport implements ClientTransport {
 
     @Override
     public Response send(Request request) {
-        NettyResponseFuture response = new NettyResponseFuture(request.getMessageId());
+        long timeout = getUrl().getLongParameter(URLParamType.requestTimeout.name(),URLParamType.requestTimeout.getLongValue());
+        NettyResponseFuture response = new NettyResponseFuture(request,timeout);
         callbackMap.put(request.getMessageId(),response);
-        channel.writeAndFlush(request);
+        ChannelFuture future = channel.writeAndFlush(request);
         response.getValue();    //阻塞直到获取返回值
         return response;
     }

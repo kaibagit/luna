@@ -19,6 +19,8 @@ public class NettyCallbackHandler extends ChannelInboundHandlerAdapter {
         Response response = (Response) msg;
         long messageId = response.getMessageId();
         NettyResponseFuture future = transport.removeCallback(messageId);
-        future.complete(response);
+        if(future != null){     //有可能是客户端已经timeout移除掉了
+            future.complete(response);
+        }
     }
 }
