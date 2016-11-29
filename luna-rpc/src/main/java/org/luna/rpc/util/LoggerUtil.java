@@ -9,23 +9,33 @@ import org.slf4j.LoggerFactory;
  */
 public class LoggerUtil {
 
-    private static Logger error = LoggerFactory.getLogger("error");
-
-    private static Logger info = LoggerFactory.getLogger("info");
+    private static Logger logger = LoggerFactory.getLogger("luna-rpc");
 
     public static void error(String msg) {
-        error.error(msg);
+        logger.error(msg);
     }
 
     public static void error(String format, Object... argArray) {
-        error.error(format, argArray);
+        logger.error(format, argArray);
     }
 
     public static void error(String msg, Throwable t) {
-        error.error(msg, t);
+        logger.error(msg, t);
     }
 
     public static void info(String msg) {
-        info.info(msg);
+        logger.info(msg);
+    }
+
+    public static void debug(String format, Object arg){
+        logger.debug(format,arg);
+    }
+
+    public static void debug(String format, Object... arguments){
+        logger.debug(format,arguments);
+    }
+
+    public static void debug(String msg, Throwable t){
+        logger.debug(msg,t);
     }
 }

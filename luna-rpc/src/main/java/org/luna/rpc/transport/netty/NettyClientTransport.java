@@ -31,6 +31,9 @@ public class NettyClientTransport implements ClientTransport {
     // 客户端请求回调Map，key值为messageId
     private ConcurrentMap<Long, NettyResponseFuture> callbackMap = new ConcurrentHashMap<>();
 
+    /** 是否已启动 */
+    private volatile boolean started = false;
+
     public NettyClientTransport(URL url){
         this.url = url;
     }
@@ -41,7 +44,10 @@ public class NettyClientTransport implements ClientTransport {
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
+        if(started){
+            return;
+        }
         try{
             Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.getName(),URLParamType.codec.getValue()));
             ChannelInitializer<SocketChannel> channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
@@ -63,6 +69,7 @@ public class NettyClientTransport implements ClientTransport {
         }catch (Exception e){
             throw new LunaRpcException("NettyClientTransport start error .",e);
         }
+        started = true;
     }
 
     @Override
