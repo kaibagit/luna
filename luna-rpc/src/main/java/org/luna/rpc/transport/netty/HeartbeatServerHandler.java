@@ -17,7 +17,7 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if(evt instanceof IdleStateEvent){
             IdleStateEvent event = (IdleStateEvent) evt;
-            if(event.state() == IdleState.ALL_IDLE){
+            if(event.state() == IdleState.READER_IDLE){
                 Channel channel = ctx.channel();
                 LoggerUtil.info("Remote "+channel.remoteAddress()+" is timeout. Channel is closed.");
                 ctx.channel().close();
