@@ -12,6 +12,8 @@ public class NettyResponseFuture extends Response {
 
     private volatile boolean done = false;
 
+    private long createTime = System.currentTimeMillis();
+
     /** 客户端请求超时时间，单位ms */
     private long timeout = 0;
 
@@ -32,7 +34,7 @@ public class NettyResponseFuture extends Response {
             } catch (InterruptedException e) {}
             if(!done){
                 Invocation invocation = (Invocation) request.getData();
-                String msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",timeout,invocation.getServiceName(),invocation.getMethodName(),invocation.getApplication(),invocation.getVersion());
+                String msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",System.currentTimeMillis() - createTime,invocation.getServiceName(),invocation.getMethodName(),invocation.getApplication(),invocation.getVersion());
                 throw new LunaRpcException(msg);
             }
         }
