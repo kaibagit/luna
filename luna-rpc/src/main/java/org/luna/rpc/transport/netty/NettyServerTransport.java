@@ -1,5 +1,6 @@
 package org.luna.rpc.transport.netty;
 
+import io.netty.handler.timeout.IdleStateHandler;
 import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.LunaRpcException;
@@ -17,6 +18,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.luna.rpc.util.LoggerUtil;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by luliru on 2016/11/12.
  */
@@ -29,6 +32,10 @@ public class NettyServerTransport implements ServerTransport {
     private ServerBootstrap serverBootstrap;
 
     private volatile boolean started = false;
+
+    private static final int READ_IDEL_TIME_OUT = 25; // 读超时
+    private static final int WRITE_IDEL_TIME_OUT = 25;// 写超时
+    private static final int ALL_IDEL_TIME_OUT = 30; // 所有超时
 
     public NettyServerTransport(URL url, MessageHandler messageHandler) {
         this.url = url;
@@ -48,6 +55,9 @@ public class NettyServerTransport implements ServerTransport {
                     ChannelPipeline pipeline = ch.pipeline();
                     pipeline.addLast("decoder", new NettyDecoder(NettyServerTransport.this,codec));
                     pipeline.addLast("encoder", new NettyEncoder(NettyServerTransport.this,codec));
+                    pipeline.addLast(new IdleStateHandler(READ_IDEL_TIME_OUT,
+                            WRITE_IDEL_TIME_OUT, ALL_IDEL_TIME_OUT, TimeUnit.SECONDS));     //心跳触发handler
+                    pipeline.addLast("heartbeatHandler",new HeartbeatServerHandler());      //心跳处理handler
                     pipeline.addLast("handler", new NettyMessageHandler(NettyServerTransport.this,messageHandler));
                     pipeline.addLast("errorHandler",new ExceptionHandler());
                 }
