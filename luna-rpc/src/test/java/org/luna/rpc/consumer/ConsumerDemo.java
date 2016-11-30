@@ -1,7 +1,9 @@
 package org.luna.rpc.consumer;
 
+import org.apache.thrift.TException;
 import org.luna.rpc.api.DemoService;
 import org.luna.rpc.api.MemberService;
+import org.luna.rpc.api.thrift.Member;
 import org.luna.rpc.config.ProtocolConfig;
 import org.luna.rpc.config.ReferenceConfig;
 
@@ -13,7 +15,7 @@ import java.util.Date;
  */
 public class ConsumerDemo {
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws TException {
         ProtocolConfig protocol = new ProtocolConfig();
         protocol.setName("luna");
         protocol.setHost("localhost");
@@ -45,6 +47,20 @@ public class ConsumerDemo {
             }
         });
         System.out.println(memberService.getDescription(1));
+
+
+        ProtocolConfig thriftProtocol = new ProtocolConfig();
+        thriftProtocol.setName("luna");
+        thriftProtocol.setHost("localhost");
+        thriftProtocol.setPort(8090);
+        ReferenceConfig<org.luna.rpc.api.thrift.MemberService.Iface> referenceConfig3 = new ReferenceConfig<>();
+        referenceConfig3.setApplication("luna-rpc-demo");
+        referenceConfig3.setServiceClass(org.luna.rpc.api.thrift.MemberService.Iface.class);
+        referenceConfig3.setProtocol(thriftProtocol);
+        org.luna.rpc.api.thrift.MemberService.Iface thriftMemservice = referenceConfig3.getRef();
+        thriftMemservice.create(new Member(1L,"luliru",2));
+        System.out.println(thriftMemservice.findById(1L));
+
     }
 
 }

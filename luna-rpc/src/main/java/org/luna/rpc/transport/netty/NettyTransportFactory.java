@@ -11,21 +11,31 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * NettyTransport工厂类
  * Created by luliru on 2016/11/7.
  */
 public class NettyTransportFactory implements TransportFactory {
 
     private Map<String,ClientTransport> clientTransportMap = new ConcurrentHashMap<>();
 
-    private ServerTransport serverTransport;
-
-    private ClientTransport clientTransport;
+    private Map<String,ServerTransport> serverTransportMap = new ConcurrentHashMap<>();
 
     private Object lock = new Object();     //并发锁，防止并发创建Transport
 
     @Override
     public ServerTransport createServerTransport(URL url, MessageHandler messageHandler) {
-        return getSingtonServerTransport(url,messageHandler);
+        String key = getMapKey(url);
+        ServerTransport serverTransport = serverTransportMap.get(key);
+        if(serverTransport == null){
+            synchronized (lock){
+                serverTransport = serverTransportMap.get(key);
+                if(serverTransport == null){
+                    serverTransport = new NettyServerTransport(url,messageHandler);
+                    serverTransportMap.put(key,serverTransport);
+                }
+            }
+        }
+        return serverTransport;
     }
 
     @Override
@@ -43,14 +53,6 @@ public class NettyTransportFactory implements TransportFactory {
         }
         LoggerUtil.debug("Mapping {} => {}",url,clientTransport);
         return clientTransport;
-    }
-
-    private synchronized ServerTransport getSingtonServerTransport(URL url, MessageHandler messageHandler){
-        if(serverTransport == null){
-            NettyServerTransport serverTransport = new NettyServerTransport(url,messageHandler);
-            this.serverTransport = serverTransport;
-        }
-        return serverTransport;
     }
 
     private String getMapKey(URL url){

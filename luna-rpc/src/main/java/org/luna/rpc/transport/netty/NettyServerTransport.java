@@ -71,7 +71,7 @@ public class NettyServerTransport implements ServerTransport {
                     .childHandler(channelChannelInitializer)
                     .bind(url.getPort()).sync();
             started = true;
-            LoggerUtil.info("NettyServerTransport started.");
+            LoggerUtil.info("NettyServerTransport started , ip="+url.getPort());
         }catch (Exception e){
             throw new LunaRpcException("NettyServerTransport start fail .",e);
         }

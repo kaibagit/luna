@@ -1,13 +1,10 @@
 package org.luna.rpc.serialize;
 
 /**
+ * 序列化
  * Created by kaiba on 2016/5/30.
  */
 public interface Serialization {
-
-//    public static Serialization getInstance(int SerializationType){
-//        return null;
-//    };
 
     public <T> T deserialize(byte[] bytes, Class<T> clazz);
 

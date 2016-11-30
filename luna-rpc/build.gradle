@@ -17,5 +17,6 @@ dependencies {
     compile 'org.javassist:javassist:3.18.0-GA'
     compile 'com.alibaba:fastjson:1.1.22'
     compile 'com.caucho:hessian:4.0.38'
+    compile 'org.apache.thrift:libthrift:0.9.3'
     testCompile group: 'junit', name: 'junit', version:'4.11'
 }

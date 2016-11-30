@@ -2,6 +2,8 @@ package org.luna.rpc.provider;
 
 import org.luna.rpc.api.DemoService;
 import org.luna.rpc.api.MemberService;
+import org.luna.rpc.api.ThriftMemberServiceImpl;
+import org.luna.rpc.api.thrift.Member;
 import org.luna.rpc.config.ApplicationConfig;
 import org.luna.rpc.config.ProtocolConfig;
 import org.luna.rpc.config.ServiceConfig;
@@ -18,9 +20,9 @@ public class ProviderDemo {
         lunaProtocol.setName("luna");
         lunaProtocol.setPort(6666);
 
-        ProtocolConfig dubboProtocol = new ProtocolConfig();
-        dubboProtocol.setName("dubbo");
-        dubboProtocol.setPort(8087);
+//        ProtocolConfig dubboProtocol = new ProtocolConfig();
+//        dubboProtocol.setName("dubbo");
+//        dubboProtocol.setPort(8087);
 
         ServiceConfig<DemoService> serviceConfig = new ServiceConfig<DemoService>();
         serviceConfig.setApplication(applicationConfig);
@@ -39,6 +41,18 @@ public class ProviderDemo {
 
         serviceConfig.export();
         serviceConfig2.export();
+
+        ProtocolConfig thriftProtocol = new ProtocolConfig();
+        thriftProtocol.setName("luna");
+        thriftProtocol.setPort(8090);
+        thriftProtocol.setSerialization("thrift");
+
+        ServiceConfig<org.luna.rpc.api.thrift.MemberService.Iface> thriftMemberService = new ServiceConfig<>();
+        thriftMemberService.setApplication(applicationConfig);
+        thriftMemberService.setServiceClass(org.luna.rpc.api.thrift.MemberService.Iface.class);
+        thriftMemberService.setRef(new ThriftMemberServiceImpl());
+        thriftMemberService.addProtocol(thriftProtocol);
+        thriftMemberService.export();
 
         System.out.println("server start...");
     }
