@@ -1,10 +1,13 @@
 package org.luna.rpc.serialize;
 
 import com.alibaba.fastjson.JSON;
+import org.luna.rpc.core.extension.Spi;
 
 /**
+ * Json序列化
  * Created by kaiba on 2016/5/30.
  */
+@Spi(name = "json")
 public class JsonSerialization implements Serialization {
 
     public <T> T deserialize(byte[] bytes, Class<T> clazz) {

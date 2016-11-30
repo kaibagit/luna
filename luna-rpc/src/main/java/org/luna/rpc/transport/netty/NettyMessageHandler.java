@@ -37,6 +37,12 @@ public class NettyMessageHandler extends ChannelInboundHandlerAdapter {
                 }else{
                     Object result = messageHandler.handle(transport,request);
                     ctx.writeAndFlush(result);
+                    if(result instanceof Response){
+                        Response response = (Response) result;
+                        if(response.getException() != null){
+                            LoggerUtil.error("MessageHandler handler error",response.getException());
+                        }
+                    }
                 }
             }else{
                 throw new LunaRpcException("Unsupported message type : "+msg.getClass().getName());

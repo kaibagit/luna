@@ -2,6 +2,7 @@ package org.luna.rpc.config;
 
 import java.util.List;
 
+import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
@@ -39,6 +40,7 @@ public class ReferenceConfig<T> {
 
         ProtocolConfig protocolConfig = protocol;
         URL refUrl = new URL(protocolConfig.getName(),protocolConfig.getHost(),protocolConfig.getPort(),application,serviceClass.getName(),version);
+        refUrl.addParameter(URLParamType.serialize.name(),protocolConfig.getSerialization());
         Protocol protocol = ExtensionLoader.getExtension(Protocol.class,protocolConfig.getName());
         protocol = new FilterWrapperProtocol(protocol);
         Client<T> client = protocol.refer(serviceClass,refUrl);

@@ -53,6 +53,7 @@ public class ConsumerDemo {
         thriftProtocol.setName("luna");
         thriftProtocol.setHost("localhost");
         thriftProtocol.setPort(8090);
+        thriftProtocol.setSerialization("thrift");
         ReferenceConfig<org.luna.rpc.api.thrift.MemberService.Iface> referenceConfig3 = new ReferenceConfig<>();
         referenceConfig3.setApplication("luna-rpc-demo");
         referenceConfig3.setServiceClass(org.luna.rpc.api.thrift.MemberService.Iface.class);

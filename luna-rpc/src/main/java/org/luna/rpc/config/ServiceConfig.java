@@ -1,5 +1,6 @@
 package org.luna.rpc.config;
 
+import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Exporter;
 import org.luna.rpc.core.Invoker;
 import org.luna.rpc.core.LunaRpcException;
@@ -55,6 +56,7 @@ public class ServiceConfig<T> {
 
     private URL createURL(ProtocolConfig protocol){
         URL url = new URL(protocol.getName(),protocol.getHost(),protocol.getPort(),application.getName(),serviceClass.getName(),version);
+        url.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
         return url;
     }
 

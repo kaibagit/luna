@@ -1,1 +1,3 @@
 org.luna.rpc.serialize.Hessian2Serialization
+org.luna.rpc.serialize.ThriftSerialization
+org.luna.rpc.serialize.JsonSerialization

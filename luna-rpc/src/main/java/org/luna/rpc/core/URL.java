@@ -1,5 +1,7 @@
 package org.luna.rpc.core;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,5 +92,12 @@ public class URL {
 
     public String getVersion() {
         return version;
+    }
+
+    public void addParameter(String name, String value) {
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(value)) {
+            return;
+        }
+        parameters.put(name, value);
     }
 }
