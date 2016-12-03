@@ -90,8 +90,7 @@ public class NettyClientTransport implements ClientTransport {
         long timeout = getUrl().getLongParameter(URLParamType.requestTimeout.name(),URLParamType.requestTimeout.getLongValue());
         NettyResponseFuture response = new NettyResponseFuture(request,timeout);
         callbackMap.put(request.getMessageId(),response);
-        ChannelFuture future = channel.writeAndFlush(request);
-        response.getValue();    //阻塞直到获取返回值
+        channel.writeAndFlush(request);
         return response;
     }
 

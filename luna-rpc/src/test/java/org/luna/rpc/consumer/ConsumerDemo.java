@@ -4,11 +4,13 @@ import org.apache.thrift.TException;
 import org.luna.rpc.api.DemoService;
 import org.luna.rpc.api.MemberService;
 import org.luna.rpc.api.thrift.Member;
+import org.luna.rpc.config.MethodConfig;
 import org.luna.rpc.config.ProtocolConfig;
 import org.luna.rpc.config.ReferenceConfig;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by luliru on 2016/11/17.
@@ -21,12 +23,19 @@ public class ConsumerDemo {
         protocol.setHost("localhost");
         protocol.setPort(6666);
 
+        List<MethodConfig> methodConfigs = new ArrayList<>();
+        MethodConfig methodConfig = new MethodConfig();
+        methodConfig.setName("hello");
+        methodConfig.setAsync(true);
+        methodConfigs.add(methodConfig);
+
         ReferenceConfig<DemoService> referenceConfig = new ReferenceConfig<>();
         referenceConfig.setApplication("luna-rpc-demo");
         referenceConfig.setServiceClass(DemoService.class);
         referenceConfig.setVersion("1.0");
         referenceConfig.setDirectUrl("localhost:6666");
         referenceConfig.setProtocol(protocol);
+        referenceConfig.setMethods(methodConfigs);
 
         DemoService demoService = referenceConfig.getRef();
         System.out.println(demoService.getById(1));

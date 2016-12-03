@@ -12,7 +12,10 @@ public enum URLParamType {
     serialize("serialization", "hessian2"),
 
     /** request timeout **/
-    requestTimeout("requestTimeout", "500");
+    requestTimeout("requestTimeout", "500"),
+
+    /** async */
+    async("async","false");
 
     private String name;
 

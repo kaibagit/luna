@@ -66,6 +66,14 @@ public class URL {
         return Long.valueOf(stringValue);
     }
 
+    public Boolean getBooleanParameter(String name,boolean defaultValue){
+        String stringValue = parameters.get(name);
+        if(stringValue == null || stringValue.trim().length() == 0){
+            return defaultValue;
+        }
+        return Boolean.valueOf(stringValue);
+    }
+
     public String getProtocol() {
         return protocol;
     }

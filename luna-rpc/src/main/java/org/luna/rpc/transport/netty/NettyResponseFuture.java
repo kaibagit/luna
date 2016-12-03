@@ -5,10 +5,15 @@ import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.Response;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 /**
  * Created by luliru on 2016/11/19.
  */
-public class NettyResponseFuture extends Response {
+public class NettyResponseFuture extends Response implements Future {
 
     private volatile boolean done = false;
 
@@ -65,4 +70,28 @@ public class NettyResponseFuture extends Response {
         return super.getException();
     }
 
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return false;
+    }
+
+    @Override
+    public boolean isDone() {
+        return false;
+    }
+
+    @Override
+    public Object get() throws InterruptedException, ExecutionException {
+        return null;
+    }
+
+    @Override
+    public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return null;
+    }
 }

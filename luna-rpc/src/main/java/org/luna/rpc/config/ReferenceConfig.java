@@ -1,9 +1,13 @@
 package org.luna.rpc.config;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
+import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.FilterWrapperProtocol;
@@ -26,7 +30,7 @@ public class ReferenceConfig<T> {
     private ProtocolConfig protocol;
 
     // 具体到方法的配置
-    protected List<MethodConfig> methods;
+    private List<MethodConfig> methods;
 
     // 点对点直连服务提供地址
     private String directUrl;
@@ -37,10 +41,11 @@ public class ReferenceConfig<T> {
         if(ref != null){
             return;
         }
+        checkInterfaceAndMethods(serviceClass,methods);
 
         ProtocolConfig protocolConfig = protocol;
         URL refUrl = new URL(protocolConfig.getName(),protocolConfig.getHost(),protocolConfig.getPort(),application,serviceClass.getName(),version);
-        refUrl.addParameter(URLParamType.serialize.name(),protocolConfig.getSerialization());
+        addParameters(refUrl);
         Protocol protocol = ExtensionLoader.getExtension(Protocol.class,protocolConfig.getName());
         protocol = new FilterWrapperProtocol(protocol);
         Client<T> client = protocol.refer(serviceClass,refUrl);
@@ -101,5 +106,37 @@ public class ReferenceConfig<T> {
 
     public void setProtocol(ProtocolConfig protocol) {
         this.protocol = protocol;
+    }
+
+    /**
+     * 增加URL参数
+     * @param refUrl
+     */
+    private void addParameters(URL refUrl){
+        refUrl.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
+        for(MethodConfig method : methods){
+            String str = String.format("methods.%s.%s",method.getName(),URLParamType.async.getName());
+            refUrl.addParameter(str,String.valueOf(method.isAsync()));
+        }
+    }
+
+    /**
+     * 检查接口和方法配置
+     * @param serviceClass
+     * @param methods
+     */
+    private void checkInterfaceAndMethods(Class<T> serviceClass,List<MethodConfig> methods){
+        for(MethodConfig methodConfig : methods){
+            boolean hasMethod = false;
+            for(Method method : serviceClass.getMethods()){
+                if(method.getName().equals(methodConfig.getName())){
+                    hasMethod = true;
+                    break;
+                }
+            }
+            if(!hasMethod){
+                throw new LunaRpcException("Service "+serviceClass.getName()+" not found method "+methodConfig.getName());
+            }
+        }
     }
 }

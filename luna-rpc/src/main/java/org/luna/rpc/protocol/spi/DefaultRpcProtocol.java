@@ -7,6 +7,7 @@ import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.core.extension.Spi;
 import org.luna.rpc.protocol.Protocol;
 import org.luna.rpc.transport.*;
+import org.luna.rpc.util.RpcUtil;
 
 /**
  * Created by luliru on 2016/11/1.
@@ -88,13 +89,18 @@ public class DefaultRpcProtocol implements Protocol {
 
         @Override
         public Result call(Invocation invocation) {
+            DefaultRpcResult result = new DefaultRpcResult();
+
             Request request = new Request();
             request.setData(invocation);
-            Response response = clientTransport.send(request);
-
-            DefaultRpcResult result = new DefaultRpcResult();
-            result.setException(response.getException());
-            result.setValue(response.getValue());
+            boolean isAsync = RpcUtil.isAsync(getUrl(),invocation);
+            if(isAsync){
+                result.setValue(null);
+            }else{
+                Response response = clientTransport.send(request);
+                result.setException(response.getException());   //阻塞直到获取返回值
+                result.setValue(response.getValue());
+            }
             return result;
         }
 
