@@ -5,6 +5,7 @@ import org.luna.rpc.core.buildin.DefaultMessageHandler;
 import org.luna.rpc.core.buildin.DefaultRpcResult;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.core.extension.Spi;
+import org.luna.rpc.protocol.FutureAdapter;
 import org.luna.rpc.protocol.Protocol;
 import org.luna.rpc.transport.*;
 import org.luna.rpc.util.RpcUtil;
@@ -94,12 +95,18 @@ public class DefaultRpcProtocol implements Protocol {
             Request request = new Request();
             request.setData(invocation);
             boolean isAsync = RpcUtil.isAsync(getUrl(),invocation);
+            ResponseFuture responseFuture = clientTransport.send(request);
             if(isAsync){
+                FutureAdapter futureAdapter = new FutureAdapter(responseFuture);
                 result.setValue(null);
+                RpcContext.getContext().setFuture(futureAdapter);
             }else{
-                Response response = clientTransport.send(request);
-                result.setException(response.getException());   //阻塞直到获取返回值
-                result.setValue(response.getValue());
+                Object responseValue = responseFuture.get();  //阻塞直到获取返回值
+                if(responseValue instanceof Exception){
+                    result.setException((Exception)responseValue);
+                }else{
+                    result.setValue(responseValue);
+                }
             }
             return result;
         }

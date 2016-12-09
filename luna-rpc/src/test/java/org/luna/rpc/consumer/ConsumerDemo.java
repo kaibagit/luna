@@ -26,7 +26,6 @@ public class ConsumerDemo {
         List<MethodConfig> methodConfigs = new ArrayList<>();
         MethodConfig methodConfig = new MethodConfig();
         methodConfig.setName("hello");
-        methodConfig.setAsync(true);
         methodConfigs.add(methodConfig);
 
         ReferenceConfig<DemoService> referenceConfig = new ReferenceConfig<>();

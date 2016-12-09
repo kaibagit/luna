@@ -29,7 +29,7 @@ public class RpcContext {
         this.future = future;
     }
 
-    public Future<?> getFuture() {
-        return future;
+    public <V> Future<V> getFuture() {
+        return (Future<V>) future;
     }
 }

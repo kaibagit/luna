@@ -46,13 +46,9 @@ public class DefaultInvoker<T> implements Invoker<T> {
         try{
             Object value = method.invoke(proxyImpl,invocation.getArguments());
             result.setValue(value);
-        } catch (Throwable e) {
-            if (e.getCause() != null) {
-                LoggerUtil.error("Exception caught when method invoke: " + e.getCause());
-                result.setException(new LunaRpcException("provider call process error", e.getCause()));
-            } else {
-                result.setException(new LunaRpcException("provider call process error", e));
-            }
+        } catch (Exception e) {
+            LoggerUtil.error("Exception caught when method invoke",e);
+            result.setException(e);
         }
         return result;
     }

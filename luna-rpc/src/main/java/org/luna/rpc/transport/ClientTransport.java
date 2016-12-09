@@ -5,5 +5,5 @@ package org.luna.rpc.transport;
  */
 public interface ClientTransport extends Transport {
 
-    Response send(Request request);
+    ResponseFuture send(Request request);
 }

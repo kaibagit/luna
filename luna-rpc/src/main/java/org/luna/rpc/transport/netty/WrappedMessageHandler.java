@@ -7,6 +7,7 @@ import org.luna.rpc.transport.Response;
 import org.luna.rpc.transport.Transport;
 
 /**
+ * MessageHandler包装类，支持heartbeat和rpc请求
  * Created by luliru on 2016/11/21.
  */
 public class WrappedMessageHandler implements MessageHandler {
@@ -23,7 +24,8 @@ public class WrappedMessageHandler implements MessageHandler {
         if(message instanceof Request){
             Request request = (Request) message;
             if(request.isHeartbeat()){
-
+                response = new Response(request.getMessageId());
+                response.setHeartbeat(true);
             }else{
                 Result result = (Result) messageHandler.handle(transport,request.getData());
                 response = new Response(request.getMessageId());

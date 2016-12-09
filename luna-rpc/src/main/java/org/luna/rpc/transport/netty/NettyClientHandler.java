@@ -8,6 +8,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.Response;
+import org.luna.rpc.transport.ResponseFuture;
 import org.luna.rpc.util.LoggerUtil;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,11 +26,7 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
 
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         Response response = (Response) msg;
-        long messageId = response.getMessageId();
-        NettyResponseFuture future = transport.removeCallback(messageId);
-        if(future != null){     //有可能是客户端已经timeout移除掉了
-            future.complete(response);
-        }
+        ResponseFuture.received(response);
     }
 
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -42,8 +39,7 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
                 Request request = new Request();
                 request.setHeartbeat(true);
                 try{
-                    Response response = transport.send(request);
-                    response.getValue();
+                    transport.send(request);
                 }catch (Exception e){
                     channel.close();
                     throw new LunaRpcException("Lost connection from "+channel.remoteAddress());

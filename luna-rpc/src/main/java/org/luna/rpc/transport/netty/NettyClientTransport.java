@@ -14,6 +14,7 @@ import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.transport.ClientTransport;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.Response;
+import org.luna.rpc.transport.ResponseFuture;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -29,9 +30,6 @@ public class NettyClientTransport implements ClientTransport {
     private EventLoopGroup group;
 
     private Channel channel;
-
-    // 客户端请求回调Map，key值为messageId
-    private ConcurrentMap<Long, NettyResponseFuture> callbackMap = new ConcurrentHashMap<>();
 
     /** 是否已启动 */
     private volatile boolean started = false;
@@ -86,15 +84,10 @@ public class NettyClientTransport implements ClientTransport {
     }
 
     @Override
-    public Response send(Request request) {
+    public ResponseFuture send(Request request) {
         long timeout = getUrl().getLongParameter(URLParamType.requestTimeout.name(),URLParamType.requestTimeout.getLongValue());
-        NettyResponseFuture response = new NettyResponseFuture(request,timeout);
-        callbackMap.put(request.getMessageId(),response);
+        ResponseFuture future = new ResponseFuture(request,timeout);
         channel.writeAndFlush(request);
-        return response;
-    }
-
-    public NettyResponseFuture removeCallback(long messageId) {
-        return callbackMap.remove(messageId);
+        return future;
     }
 }
