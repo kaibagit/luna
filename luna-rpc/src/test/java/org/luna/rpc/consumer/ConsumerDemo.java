@@ -18,11 +18,6 @@ import java.util.List;
 public class ConsumerDemo {
 
     public static void main(String[] args) throws TException {
-        ProtocolConfig protocol = new ProtocolConfig();
-        protocol.setName("luna");
-        protocol.setHost("localhost");
-        protocol.setPort(6666);
-
         List<MethodConfig> methodConfigs = new ArrayList<>();
         MethodConfig methodConfig = new MethodConfig();
         methodConfig.setName("hello");
@@ -32,8 +27,8 @@ public class ConsumerDemo {
         referenceConfig.setApplication("luna-rpc-demo");
         referenceConfig.setServiceClass(DemoService.class);
         referenceConfig.setVersion("1.0");
-        referenceConfig.setDirectUrl("localhost:6666");
-        referenceConfig.setProtocol(protocol);
+        referenceConfig.setProtocol("luna");
+        referenceConfig.setUrls("localhost:6666");
         referenceConfig.setMethods(methodConfigs);
 
         DemoService demoService = referenceConfig.getRef();
@@ -45,8 +40,8 @@ public class ConsumerDemo {
         referenceConfig2.setApplication("luna-rpc-demo");
         referenceConfig2.setServiceClass(MemberService.class);
         referenceConfig2.setVersion("1.0");
-        referenceConfig2.setDirectUrl("localhost:6666");
-        referenceConfig2.setProtocol(protocol);
+        referenceConfig2.setUrls("localhost:6666");
+        referenceConfig2.setProtocol("luna");
 
         MemberService memberService = referenceConfig2.getRef();
         memberService.findByParams(false,new Date(),new ArrayList<Integer>(){
@@ -57,15 +52,12 @@ public class ConsumerDemo {
         System.out.println(memberService.getDescription(1));
 
 
-        ProtocolConfig thriftProtocol = new ProtocolConfig();
-        thriftProtocol.setName("luna");
-        thriftProtocol.setHost("localhost");
-        thriftProtocol.setPort(8090);
-        thriftProtocol.setSerialization("thrift");
         ReferenceConfig<org.luna.rpc.api.thrift.MemberService.Iface> referenceConfig3 = new ReferenceConfig<>();
         referenceConfig3.setApplication("luna-rpc-demo");
         referenceConfig3.setServiceClass(org.luna.rpc.api.thrift.MemberService.Iface.class);
-        referenceConfig3.setProtocol(thriftProtocol);
+        referenceConfig3.setProtocol("luna");
+        referenceConfig3.setSerialization("thrift");
+        referenceConfig3.setUrls("localhost:8090");
         org.luna.rpc.api.thrift.MemberService.Iface thriftMemservice = referenceConfig3.getRef();
         thriftMemservice.create(new Member(1L,"luliru",2));
         System.out.println(thriftMemservice.findById(1L));

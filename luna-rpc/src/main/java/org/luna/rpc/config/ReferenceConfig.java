@@ -1,10 +1,10 @@
 package org.luna.rpc.config;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.luna.rpc.cluster.ClusterClient;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.LunaRpcException;
@@ -27,13 +27,15 @@ public class ReferenceConfig<T> {
     private String version = "1.0";
 
     /** 使用的协议 */
-    private ProtocolConfig protocol;
+    private String protocolName;
+
+    private String serialization;
 
     // 具体到方法的配置
-    private List<MethodConfig> methods;
+    private List<MethodConfig> methods = new ArrayList<>();
 
-    // 点对点直连服务提供地址
-    private String directUrl;
+    /** 服务提供方的IP和端口，格式为：ip_1:port_1,ip_2:port_2 */
+    private String urls;
 
     private T ref;
 
@@ -41,16 +43,32 @@ public class ReferenceConfig<T> {
         if(ref != null){
             return;
         }
-        checkInterfaceAndMethods(serviceClass,methods);
+        checkParameters();
 
-        ProtocolConfig protocolConfig = protocol;
-        URL refUrl = new URL(protocolConfig.getName(),protocolConfig.getHost(),protocolConfig.getPort(),application,serviceClass.getName(),version);
-        addParameters(refUrl);
-        Protocol protocol = ExtensionLoader.getExtension(Protocol.class,protocolConfig.getName());
-        protocol = new FilterWrapperProtocol(protocol);
-        Client<T> client = protocol.refer(serviceClass,refUrl);
+        List<Client<T>> clients = new ArrayList<>();
+        String[] urlArr = urls.split(",");
+        for(String url : urlArr){
+            String[] ipAndPort = url.split(":");
+            String ip = ipAndPort[0];
+            int port = Integer.valueOf(ipAndPort[1]);
+            URL refUrl = new URL(protocolName,ip,port,application,serviceClass.getName(),version);
+            addParameters(refUrl);
+            Protocol protocol = ExtensionLoader.getExtension(Protocol.class,protocolName);
+            protocol = new FilterWrapperProtocol(protocol);
+            Client<T> client = protocol.refer(serviceClass,refUrl);
+
+            clients.add(client);
+        }
+
         ProxyFactory proxyFactory = ExtensionLoader.getExtension(ProxyFactory.class);
-        ref = proxyFactory.getProxy(serviceClass,client);
+        if(clients.size() > 1){
+            URL url = new URL(protocolName,null,0,application,serviceClass.getName(),version);
+            ClusterClient<T> clusterClient = new ClusterClient(url,clients);
+            clusterClient.start();
+            ref = proxyFactory.getProxy(serviceClass,clusterClient);
+        }else{
+            ref = proxyFactory.getProxy(serviceClass,clients.get(0));
+        }
     }
 
     public Class<T> getServiceClass() {
@@ -77,14 +95,6 @@ public class ReferenceConfig<T> {
         this.methods = methods;
     }
 
-    public String getDirectUrl() {
-        return directUrl;
-    }
-
-    public void setDirectUrl(String directUrl) {
-        this.directUrl = directUrl;
-    }
-
     public T getRef() {
         if(ref == null){
             initRef();
@@ -100,12 +110,12 @@ public class ReferenceConfig<T> {
         this.application = application;
     }
 
-    public ProtocolConfig getProtocol() {
-        return protocol;
+    public String getProtocol() {
+        return protocolName;
     }
 
-    public void setProtocol(ProtocolConfig protocol) {
-        this.protocol = protocol;
+    public void setProtocol(String protocolName) {
+        this.protocolName = protocolName;
     }
 
     /**
@@ -113,11 +123,23 @@ public class ReferenceConfig<T> {
      * @param refUrl
      */
     private void addParameters(URL refUrl){
-        refUrl.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
+        if(serialization != null){
+            refUrl.addParameter(URLParamType.serialize.name(),serialization);
+        }
         for(MethodConfig method : methods){
             String str = String.format("methods.%s.%s",method.getName(),URLParamType.async.getName());
             refUrl.addParameter(str,String.valueOf(method.isAsync()));
         }
+    }
+
+    /**
+     * 检查参数
+     */
+    private void checkParameters(){
+        if(urls == null || urls.trim().length() == 0){
+            throw new LunaRpcException("Reference urls can't be blank.");
+        }
+        checkInterfaceAndMethods(serviceClass,methods);
     }
 
     /**
@@ -138,5 +160,21 @@ public class ReferenceConfig<T> {
                 throw new LunaRpcException("Service "+serviceClass.getName()+" not found method "+methodConfig.getName());
             }
         }
+    }
+
+    public String getSerialization() {
+        return serialization;
+    }
+
+    public void setSerialization(String serialization) {
+        this.serialization = serialization;
+    }
+
+    public String getUrls() {
+        return urls;
+    }
+
+    public void setUrls(String urls) {
+        this.urls = urls;
     }
 }
