@@ -20,7 +20,7 @@ public class ConsumerLoadBalancingDemo {
         methodConfigs.add(methodConfig);
 
         ReferenceConfig<DemoService> referenceConfig = new ReferenceConfig<>();
-        referenceConfig.setApplication("luna-rpc-demo");
+        referenceConfig.setGroup("luna-rpc-demo");
         referenceConfig.setServiceClass(DemoService.class);
         referenceConfig.setVersion("1.0");
         referenceConfig.setProtocol("luna");

@@ -1,5 +1,6 @@
 package org.luna.rpc.config;
 
+import org.luna.rpc.common.constant.Constraint;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Exporter;
 import org.luna.rpc.core.Invoker;
@@ -23,10 +24,13 @@ public class ServiceConfig<T> {
 
     private ApplicationConfig application;
 
-    /** 服务接口类 */
+    /** service分组 */
+    private String group = Constraint.DEFAULT_GROUP;
+
+    /** service接口类 */
     private Class<T> serviceClass;
 
-    private String version = "1.0";
+    private String version = Constraint.DEFAULT_VERSION;
 
     /** 暴露、使用的协议 */
     private List<ProtocolConfig> protocols = new ArrayList<>();
@@ -55,7 +59,7 @@ public class ServiceConfig<T> {
     }
 
     private URL createURL(ProtocolConfig protocol){
-        URL url = new URL(protocol.getName(),protocol.getHost(),protocol.getPort(),application.getName(),serviceClass.getName(),version);
+        URL url = new URL(protocol.getName(),protocol.getHost(),protocol.getPort(),group,serviceClass.getName(),version);
         url.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
         return url;
     }
@@ -127,5 +131,13 @@ public class ServiceConfig<T> {
 
     public void setApplication(ApplicationConfig application) {
         this.application = application;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }

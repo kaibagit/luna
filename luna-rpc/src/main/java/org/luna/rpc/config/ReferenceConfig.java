@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.luna.rpc.cluster.ClusterClient;
+import org.luna.rpc.common.constant.Constraint;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.LunaRpcException;
@@ -19,7 +20,8 @@ import org.luna.rpc.proxy.ProxyFactory;
  */
 public class ReferenceConfig<T> {
 
-    private String application;
+    /** service分组 */
+    private String group = Constraint.DEFAULT_GROUP;
 
     /** 服务接口类 */
     private Class<T> serviceClass;
@@ -51,7 +53,7 @@ public class ReferenceConfig<T> {
             String[] ipAndPort = url.split(":");
             String ip = ipAndPort[0];
             int port = Integer.valueOf(ipAndPort[1]);
-            URL refUrl = new URL(protocolName,ip,port,application,serviceClass.getName(),version);
+            URL refUrl = new URL(protocolName,ip,port,group,serviceClass.getName(),version);
             addParameters(refUrl);
             Protocol protocol = ExtensionLoader.getExtension(Protocol.class,protocolName);
             protocol = new FilterWrapperProtocol(protocol);
@@ -62,7 +64,7 @@ public class ReferenceConfig<T> {
 
         ProxyFactory proxyFactory = ExtensionLoader.getExtension(ProxyFactory.class);
         if(clients.size() > 1){
-            URL url = new URL(protocolName,null,0,application,serviceClass.getName(),version);
+            URL url = new URL(protocolName,null,0,group,serviceClass.getName(),version);
             ClusterClient<T> clusterClient = new ClusterClient(url,clients);
             clusterClient.start();
             ref = proxyFactory.getProxy(serviceClass,clusterClient);
@@ -100,14 +102,6 @@ public class ReferenceConfig<T> {
             initRef();
         }
         return ref;
-    }
-
-    public String getApplication() {
-        return application;
-    }
-
-    public void setApplication(String application) {
-        this.application = application;
     }
 
     public String getProtocol() {
@@ -176,5 +170,13 @@ public class ReferenceConfig<T> {
 
     public void setUrls(String urls) {
         this.urls = urls;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }

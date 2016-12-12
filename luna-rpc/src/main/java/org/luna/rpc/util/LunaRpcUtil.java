@@ -17,7 +17,7 @@ public class LunaRpcUtil {
      * @return
      */
     public static String getUniqueServiceDecription(Invocation invocation){
-        return String.format("%s/%s/%s",invocation.getApplication(),invocation.getServiceName(),invocation.getVersion());
+        return String.format("%s/%s/%s",invocation.getGroup(),invocation.getServiceName(),invocation.getVersion());
     }
 
     /**
@@ -26,6 +26,6 @@ public class LunaRpcUtil {
      * @return
      */
     public static String getUniqueServiceDecription(URL url){
-        return String.format("%s/%s/%s",url.getApplication(),url.getService(),url.getVersion());
+        return String.format("%s/%s/%s",url.getGroup(),url.getService(),url.getVersion());
     }
 }

@@ -17,7 +17,7 @@ public class URL {
 
     private int port;
 
-    private String application;
+    private String group;
 
     private String service;
 
@@ -25,11 +25,11 @@ public class URL {
 
     private Map<String, String> parameters = new HashMap<>();
 
-    public URL(String protocol, String host, int port, String application, String service, String version) {
+    public URL(String protocol, String host, int port, String group, String service, String version) {
         this.protocol = protocol;
         this.host = host;
         this.port = port;
-        this.application = application;
+        this.group = group;
         this.service = service;
         this.version = version;
     }
@@ -94,8 +94,8 @@ public class URL {
         return parameters;
     }
 
-    public String getApplication() {
-        return application;
+    public String getGroup() {
+        return group;
     }
 
     public String getVersion() {

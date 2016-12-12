@@ -23,7 +23,7 @@ public class RefererInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         URL url = client.getUrl();
         DefaultRpcInvocation invocation = new DefaultRpcInvocation();
-        invocation.setApplication(url.getApplication());
+        invocation.setGroup(url.getGroup());
         invocation.setServiceName(url.getService());
         invocation.setVersion(url.getVersion());
         invocation.setMethodName(method.getName());

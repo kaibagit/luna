@@ -41,7 +41,7 @@ public class NettyResponseFuture extends Response implements Future {
                 Object data = request.getData();
                 if(data instanceof Invocation){
                     Invocation invocation = (Invocation)data;
-                    String msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",System.currentTimeMillis() - createTime,invocation.getServiceName(),invocation.getMethodName(),invocation.getApplication(),invocation.getVersion());
+                    String msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",System.currentTimeMillis() - createTime,invocation.getServiceName(),invocation.getMethodName(),invocation.getGroup(),invocation.getVersion());
                     throw new LunaRpcException(msg);
                 }
             }

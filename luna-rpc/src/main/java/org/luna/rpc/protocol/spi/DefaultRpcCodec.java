@@ -148,7 +148,7 @@ public class DefaultRpcCodec implements Codec {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ObjectOutput output = createOutput(outputStream);
-            output.writeUTF(invocation.getApplication());
+            output.writeUTF(invocation.getGroup());
             output.writeUTF(invocation.getServiceName());
             output.writeUTF(invocation.getVersion());
             output.writeUTF(invocation.getMethodName());
@@ -267,7 +267,7 @@ public class DefaultRpcCodec implements Codec {
                 serializationName != null ? serializationName : URLParamType.serialize.getValue()
         );
 
-        invocation.setApplication(application);
+        invocation.setGroup(application);
         invocation.setServiceName(serviceName);
         invocation.setVersion(version);
         invocation.setMethodName(methodName);

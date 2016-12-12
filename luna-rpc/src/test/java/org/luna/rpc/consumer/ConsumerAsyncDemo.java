@@ -29,7 +29,7 @@ public class ConsumerAsyncDemo {
         methodConfigs.add(methodConfig);
 
         ReferenceConfig<DemoService> referenceConfig = new ReferenceConfig<>();
-        referenceConfig.setApplication("luna-rpc-demo");
+        referenceConfig.setGroup("luna-rpc-demo");
         referenceConfig.setServiceClass(DemoService.class);
         referenceConfig.setVersion("1.0");
         referenceConfig.setUrls("localhost:6666");

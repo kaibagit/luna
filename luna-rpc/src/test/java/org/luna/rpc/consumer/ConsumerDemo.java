@@ -24,7 +24,7 @@ public class ConsumerDemo {
         methodConfigs.add(methodConfig);
 
         ReferenceConfig<DemoService> referenceConfig = new ReferenceConfig<>();
-        referenceConfig.setApplication("luna-rpc-demo");
+        referenceConfig.setGroup("luna-rpc-demo");
         referenceConfig.setServiceClass(DemoService.class);
         referenceConfig.setVersion("1.0");
         referenceConfig.setProtocol("luna");
@@ -37,7 +37,7 @@ public class ConsumerDemo {
         demoService.hello();
 
         ReferenceConfig<MemberService> referenceConfig2 = new ReferenceConfig<>();
-        referenceConfig2.setApplication("luna-rpc-demo");
+        referenceConfig2.setGroup("luna-rpc-demo");
         referenceConfig2.setServiceClass(MemberService.class);
         referenceConfig2.setVersion("1.0");
         referenceConfig2.setUrls("localhost:6666");
@@ -53,7 +53,7 @@ public class ConsumerDemo {
 
 
         ReferenceConfig<org.luna.rpc.api.thrift.MemberService.Iface> referenceConfig3 = new ReferenceConfig<>();
-        referenceConfig3.setApplication("luna-rpc-demo");
+        referenceConfig3.setGroup("luna-rpc-demo");
         referenceConfig3.setServiceClass(org.luna.rpc.api.thrift.MemberService.Iface.class);
         referenceConfig3.setProtocol("luna");
         referenceConfig3.setSerialization("thrift");

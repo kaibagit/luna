@@ -26,6 +26,7 @@ public class ProviderDemo {
 
         ServiceConfig<DemoService> serviceConfig = new ServiceConfig<DemoService>();
         serviceConfig.setApplication(applicationConfig);
+        serviceConfig.setGroup("luna-rpc-demo");
         serviceConfig.setServiceClass(DemoService.class);
         serviceConfig.setRef(new DemoServiceImpl());
         serviceConfig.setVersion("1.0");
@@ -34,6 +35,7 @@ public class ProviderDemo {
 
         ServiceConfig<MemberService> serviceConfig2 = new ServiceConfig<MemberService>();
         serviceConfig2.setApplication(applicationConfig);
+        serviceConfig2.setGroup("luna-rpc-demo");
         serviceConfig2.setServiceClass(MemberService.class);
         serviceConfig2.setRef(new MemberServiceImpl());
         serviceConfig2.setVersion("1.0");
@@ -49,6 +51,7 @@ public class ProviderDemo {
 
         ServiceConfig<org.luna.rpc.api.thrift.MemberService.Iface> thriftMemberService = new ServiceConfig<>();
         thriftMemberService.setApplication(applicationConfig);
+        thriftMemberService.setGroup("luna-rpc-demo");
         thriftMemberService.setServiceClass(org.luna.rpc.api.thrift.MemberService.Iface.class);
         thriftMemberService.setRef(new ThriftMemberServiceImpl());
         thriftMemberService.addProtocol(thriftProtocol);

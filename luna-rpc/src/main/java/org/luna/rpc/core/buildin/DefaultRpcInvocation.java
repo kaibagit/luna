@@ -1,7 +1,6 @@
 package org.luna.rpc.core.buildin;
 
 import org.luna.rpc.core.Invocation;
-import org.luna.rpc.core.Invoker;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +10,7 @@ import java.util.Map;
  */
 public class DefaultRpcInvocation implements Invocation {
 
-    private String application;
+    private String group;
 
     private String serviceName;
 
@@ -26,8 +25,8 @@ public class DefaultRpcInvocation implements Invocation {
     private Map<String, String> attachments = new HashMap<>();
 
     @Override
-    public String getApplication() {
-        return application;
+    public String getGroup() {
+        return group;
     }
 
     @Override
@@ -74,8 +73,8 @@ public class DefaultRpcInvocation implements Invocation {
         return value;
     }
 
-    public void setApplication(String application) {
-        this.application = application;
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public void setServiceName(String serviceName) {

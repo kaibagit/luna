@@ -7,7 +7,7 @@ import java.util.Map;
  */
 public interface Invocation {
 
-    String getApplication();
+    String getGroup();
 
     String getServiceName();
 
