@@ -18,6 +18,9 @@ public class FilterWrapperProtocol implements Protocol {
     private Protocol protocol;
 
     public FilterWrapperProtocol(Protocol protocol){
+        if(protocol == null){
+            throw new LunaRpcException("protocol can't be null.");
+        }
         this.protocol = protocol;
     }
 

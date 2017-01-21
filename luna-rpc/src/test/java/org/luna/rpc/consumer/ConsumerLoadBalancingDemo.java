@@ -24,7 +24,7 @@ public class ConsumerLoadBalancingDemo {
         referenceConfig.setServiceClass(DemoService.class);
         referenceConfig.setVersion("1.0");
         referenceConfig.setProtocol("luna");
-        referenceConfig.setUrls("localhost:5555,localhost:7777");
+        referenceConfig.setDirect("localhost:5555,localhost:7777");
         referenceConfig.setMethods(methodConfigs);
 
         DemoService demoService = referenceConfig.getRef();

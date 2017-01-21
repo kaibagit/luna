@@ -10,11 +10,13 @@ import org.luna.rpc.core.buildin.DefaultInvoker;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.FilterWrapperProtocol;
 import org.luna.rpc.protocol.Protocol;
-import org.luna.rpc.proxy.ProxyFactory;
+import org.luna.rpc.registry.Registry;
+import org.luna.rpc.registry.RegistryFactory;
+import org.luna.rpc.util.NetUtil;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -37,38 +39,59 @@ public class ServiceConfig<T> {
 
     private List<MethodConfig> methods;
 
-    public List<ProtocolConfig> getProtocols() {
-        return protocols;
-    }
+    /** 注册中心 */
+    private RegistryConfig registry;
 
     /** service接口实现类 */
     private T ref;
 
+    public List<ProtocolConfig> getProtocols() {
+        return protocols;
+    }
+
     private List<Exporter<T>> exporters = new CopyOnWriteArrayList<Exporter<T>>();
 
     public synchronized void export() {
+        List<URL> registryList = loadRegistryUrls();
+
         List<URL> urls = new ArrayList<>();
         for(ProtocolConfig protocol : protocols){
             urls.add(createURL(protocol));
         }
 
         for(URL url : urls){
-            exporters.add(createExporter(serviceClass,url,ref));
+            exporters.add(doExporter(serviceClass,url,ref,registryList));
         }
 
     }
 
     private URL createURL(ProtocolConfig protocol){
-        URL url = new URL(protocol.getName(),protocol.getHost(),protocol.getPort(),group,serviceClass.getName(),version);
+        String hostAddress = protocol.getHost();
+        if(hostAddress == null){
+            InetAddress inetAddress = NetUtil.getLocalAddress();
+            hostAddress = inetAddress.getHostAddress();
+        }
+        URL url = new URL(protocol.getName(),hostAddress,protocol.getPort(),group,serviceClass.getName(),version);
         url.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
         return url;
     }
 
-    private Exporter<T> createExporter(Class<T> serviceClass,URL url,T ref){
+    private Exporter<T> doExporter(Class<T> serviceClass, URL url, T ref, List<URL> registryList){
         Protocol protocol = ExtensionLoader.getExtension(Protocol.class,url.getProtocol());
         protocol = new FilterWrapperProtocol(protocol);
         Invoker<T> invoker = new DefaultInvoker<>(ref,url,serviceClass);
         Exporter<T> exporter = protocol.export(invoker, url);
+
+        // register service
+        for(URL registryUrl : registryList){
+            RegistryFactory registryFactory = ExtensionLoader.getExtension(RegistryFactory.class,registryUrl.getProtocol());
+            if(registryFactory == null){
+                throw new LunaRpcException("Register error! Could not find extension for registry protocol : "+registryUrl.getProtocol());
+            }
+            Registry registry = registryFactory.getRegistry(registryUrl);
+            registry.register(url);
+        }
+
         return exporter;
     }
 
@@ -139,5 +162,30 @@ public class ServiceConfig<T> {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public void setRegistry(RegistryConfig registry) {
+        this.registry = registry;
+    }
+
+    /**
+     * 加载注册URL
+     * @return
+     */
+    private List<URL> loadRegistryUrls(){
+        List<URL> registryList = new ArrayList<URL>();
+        if(registry != null){
+            String address = registry.getAddress();
+            String[] ipAndPortArr = address.split(",");
+            for(String ipAndPort : ipAndPortArr){
+                String[] arr = ipAndPort.split(":");
+                String ip = arr[0];
+                int port = Integer.valueOf(arr[1]);
+                URL url = new URL(registry.getRegProtocol(),ip,port,null,serviceClass.getName(),null);
+                registryList.add(url);
+            }
+        }
+
+        return registryList;
     }
 }

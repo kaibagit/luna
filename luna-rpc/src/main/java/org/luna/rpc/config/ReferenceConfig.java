@@ -4,14 +4,15 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.luna.rpc.cluster.ClusterClient;
+import org.luna.rpc.cluster.DirectClusterClient;
 import org.luna.rpc.common.constant.Constraint;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
-import org.luna.rpc.protocol.FilterWrapperProtocol;
 import org.luna.rpc.protocol.Protocol;
 import org.luna.rpc.proxy.ProxyFactory;
 
@@ -37,7 +38,10 @@ public class ReferenceConfig<T> {
     private List<MethodConfig> methods = new ArrayList<>();
 
     /** 服务提供方的IP和端口，格式为：ip_1:port_1,ip_2:port_2 */
-    private String urls;
+    private String direct;
+
+    /** 注册中心 */
+    private RegistryConfig registry;
 
     private T ref;
 
@@ -47,30 +51,36 @@ public class ReferenceConfig<T> {
         }
         checkParameters();
 
-        List<Client<T>> clients = new ArrayList<>();
-        String[] urlArr = urls.split(",");
-        for(String url : urlArr){
-            String[] ipAndPort = url.split(":");
-            String ip = ipAndPort[0];
-            int port = Integer.valueOf(ipAndPort[1]);
-            URL refUrl = new URL(protocolName,ip,port,group,serviceClass.getName(),version);
-            addParameters(refUrl);
-            Protocol protocol = ExtensionLoader.getExtension(Protocol.class,protocolName);
-            protocol = new FilterWrapperProtocol(protocol);
-            Client<T> client = protocol.refer(serviceClass,refUrl);
+        Client<T> client = null;
 
-            clients.add(client);
+        if(StringUtils.isNotBlank(direct)){
+            List<URL> directUrls = new ArrayList<>();
+            String[] urlArr = direct.split(",");
+            for(String url : urlArr){
+                String[] ipAndPort = url.split(":");
+                String ip = ipAndPort[0];
+                int port = Integer.valueOf(ipAndPort[1]);
+                URL refUrl = new URL(protocolName,ip,port,group,serviceClass.getName(),version);
+                addParameters(refUrl);
+
+                directUrls.add(refUrl);
+            }
+
+            DirectClusterClient directClusterClient = new DirectClusterClient<T>(serviceClass,null,directUrls);
+            directClusterClient.start();
+
+            client = directClusterClient;
+        }else{
+            List<URL> registryList = loadRegistryUrls();
+            URL url = new URL(protocolName,"0.0.0.0",0,group,serviceClass.getName(),version);
+            ClusterClient<T> clusterClient = new ClusterClient(serviceClass,url,registryList);
+            clusterClient.start();
+
+            client = clusterClient;
         }
 
         ProxyFactory proxyFactory = ExtensionLoader.getExtension(ProxyFactory.class);
-        if(clients.size() > 1){
-            URL url = new URL(protocolName,null,0,group,serviceClass.getName(),version);
-            ClusterClient<T> clusterClient = new ClusterClient(url,clients);
-            clusterClient.start();
-            ref = proxyFactory.getProxy(serviceClass,clusterClient);
-        }else{
-            ref = proxyFactory.getProxy(serviceClass,clients.get(0));
-        }
+        ref = proxyFactory.getProxy(serviceClass,client);
     }
 
     public Class<T> getServiceClass() {
@@ -130,8 +140,8 @@ public class ReferenceConfig<T> {
      * 检查参数
      */
     private void checkParameters(){
-        if(urls == null || urls.trim().length() == 0){
-            throw new LunaRpcException("Reference urls can't be blank.");
+        if((direct == null || direct.trim().length() == 0) && registry == null){
+            throw new LunaRpcException("Reference direct or registry can't be null.");
         }
         checkInterfaceAndMethods(serviceClass,methods);
     }
@@ -156,6 +166,27 @@ public class ReferenceConfig<T> {
         }
     }
 
+    /**
+     * 加载注册URL
+     * @return
+     */
+    private List<URL> loadRegistryUrls(){
+        List<URL> registryList = new ArrayList<URL>();
+        if(registry != null){
+            String address = registry.getAddress();
+            String[] ipAndPortArr = address.split(",");
+            for(String ipAndPort : ipAndPortArr){
+                String[] arr = ipAndPort.split(":");
+                String ip = arr[0];
+                int port = Integer.valueOf(arr[1]);
+                URL url = new URL(registry.getRegProtocol(),ip,port,group,serviceClass.getName(),version);
+                registryList.add(url);
+            }
+        }
+
+        return registryList;
+    }
+
     public String getSerialization() {
         return serialization;
     }
@@ -164,12 +195,12 @@ public class ReferenceConfig<T> {
         this.serialization = serialization;
     }
 
-    public String getUrls() {
-        return urls;
+    public String getDirect() {
+        return direct;
     }
 
-    public void setUrls(String urls) {
-        this.urls = urls;
+    public void setDirect(String direct) {
+        this.direct = direct;
     }
 
     public String getGroup() {
@@ -178,5 +209,9 @@ public class ReferenceConfig<T> {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public void setRegistry(RegistryConfig registry) {
+        this.registry = registry;
     }
 }

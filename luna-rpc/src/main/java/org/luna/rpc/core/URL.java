@@ -108,4 +108,24 @@ public class URL {
         }
         parameters.put(name, value);
     }
+
+    public String toString(){
+        return String.format("%s://%s:%d/%s",protocol,host,port,service);
+    }
+
+    public String toFullStr(){
+//        StringBuilder builder = new StringBuilder();
+//        builder.append(getUri()).append("?");
+//
+//        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+//            String name = entry.getKey();
+//            String value = entry.getValue();
+//
+//            builder.append(name).append("=").append(value).append("&");
+//        }
+//
+//        return builder.toString();
+        //TODO url.toFullStr()
+        return toString();
+    }
 }

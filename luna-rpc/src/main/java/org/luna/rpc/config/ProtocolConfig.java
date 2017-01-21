@@ -9,7 +9,7 @@ public class ProtocolConfig {
     // 服务协议
     private String name;
 
-    private String host = "0.0.0.0";
+    private String host;
 
     private int port;
 
