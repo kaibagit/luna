@@ -8,4 +8,8 @@ public class Constraint {
     public static final String DEFAULT_GROUP = "default";
 
     public static final String DEFAULT_VERSION = "1.0";
+
+    public static final String SIDE_PROVIDER = "provider";
+
+    public static final String SIDE_CONSUMER = "consumer";
 }

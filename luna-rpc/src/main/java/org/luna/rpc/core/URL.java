@@ -114,18 +114,21 @@ public class URL {
     }
 
     public String toFullStr(){
-//        StringBuilder builder = new StringBuilder();
-//        builder.append(getUri()).append("?");
-//
-//        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-//            String name = entry.getKey();
-//            String value = entry.getValue();
-//
-//            builder.append(name).append("=").append(value).append("&");
-//        }
-//
-//        return builder.toString();
-        //TODO url.toFullStr()
-        return toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append(this.toString()).append("?");
+
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
+
+            builder.append(name).append("=").append(value).append("&");
+        }
+
+        char lastChar = builder.charAt(builder.length() - 1);
+        if(lastChar == '?' || lastChar == '&'){
+            builder.deleteCharAt(builder.length() -1);
+        }
+
+        return builder.toString();
     }
 }

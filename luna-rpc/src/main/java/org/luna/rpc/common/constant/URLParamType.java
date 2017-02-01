@@ -15,7 +15,10 @@ public enum URLParamType {
     requestTimeout("requestTimeout", "500"),
 
     /** async */
-    async("async","false");
+    async("async","false"),
+
+    /** provider or consumer */
+    side("side",null);
 
     private String name;
 
