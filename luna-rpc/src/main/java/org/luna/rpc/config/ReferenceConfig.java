@@ -1,6 +1,7 @@
 package org.luna.rpc.config;
 
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.Protocol;
 import org.luna.rpc.proxy.ProxyFactory;
+import org.luna.rpc.util.NetUtil;
 
 /**
  * Created by luliru on 2016/10/14.
@@ -72,7 +74,10 @@ public class ReferenceConfig<T> {
             client = directClusterClient;
         }else{
             List<URL> registryList = loadRegistryUrls();
-            URL url = new URL(protocolName,"0.0.0.0",0,group,serviceClass.getName(),version);
+            InetAddress inetAddress = NetUtil.getLocalAddress();
+            String hostAddress = inetAddress.getHostAddress();
+            URL url = new URL(protocolName,hostAddress,0,group,serviceClass.getName(),version);
+            url.addParameter(URLParamType.side.getName(),Constraint.SIDE_CONSUMER);
             ClusterClient<T> clusterClient = new ClusterClient(serviceClass,url,registryList);
             clusterClient.start();
 

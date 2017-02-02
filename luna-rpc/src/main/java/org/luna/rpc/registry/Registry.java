@@ -13,4 +13,11 @@ public interface Registry {
      * @param url
      */
     void register(URL url);
+
+    /**
+     * 订阅
+     * @param url
+     * @param listener
+     */
+    void subscribe(URL url, NotifyListener listener);
 }

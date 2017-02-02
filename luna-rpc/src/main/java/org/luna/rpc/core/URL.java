@@ -1,5 +1,6 @@
 package org.luna.rpc.core;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -130,5 +131,13 @@ public class URL {
         }
 
         return builder.toString();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof URL)) {
+            return false;
+        }
+        URL ou = (URL) obj;
+        return this.toString().equals(ou.toString());
     }
 }

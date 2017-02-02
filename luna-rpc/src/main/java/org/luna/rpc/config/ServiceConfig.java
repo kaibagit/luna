@@ -73,6 +73,7 @@ public class ServiceConfig<T> {
         }
         URL url = new URL(protocol.getName(),hostAddress,protocol.getPort(),group,serviceClass.getName(),version);
         url.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
+        url.addParameter(URLParamType.side.getName(),Constraint.SIDE_PROVIDER);
         return url;
     }
 
