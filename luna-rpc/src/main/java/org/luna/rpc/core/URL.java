@@ -1,10 +1,10 @@
 package org.luna.rpc.core;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.luna.rpc.common.constant.URLParamType;
 
 /**
  * URL总线
@@ -12,31 +12,82 @@ import java.util.Map;
  */
 public class URL {
 
-    private String protocol;
+    protected String protocol;
 
-    private String host;
+    protected String host;
 
-    private int port;
+    protected int port;
 
-    private String group;
+    protected String service;
 
-    private String service;
+    protected String version;
 
-    private String version;
-
-    private Map<String, String> parameters = new HashMap<>();
+    protected Map<String, String> parameters = new HashMap<>();
 
     public URL(String protocol, String host, int port, String group, String service, String version) {
         this.protocol = protocol;
         this.host = host;
         this.port = port;
-        this.group = group;
         this.service = service;
         this.version = version;
+        if(StringUtils.isNotBlank(group)){
+            parameters.put(URLParamType.group.getName(),group);
+        }
     }
 
     public static URL valueOf(String url){
-        return null;
+        if (StringUtils.isBlank(url)) {
+            throw new LunaRpcException("url is null");
+        }
+        String protocol = null;
+        String host = null;
+        int port = 0;
+        String path = null;
+        Map<String, String> parameters = new HashMap<String, String>();;
+        int i = url.indexOf("?"); // seperator between body and parameters
+        if (i >= 0) {
+            String[] parts = url.substring(i + 1).split("\\&");
+
+            for (String part : parts) {
+                part = part.trim();
+                if (part.length() > 0) {
+                    int j = part.indexOf('=');
+                    if (j >= 0) {
+                        parameters.put(part.substring(0, j), part.substring(j + 1));
+                    } else {
+                        parameters.put(part, part);
+                    }
+                }
+            }
+            url = url.substring(0, i);
+        }
+        i = url.indexOf("://");
+        if (i >= 0) {
+            if (i == 0) throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+            protocol = url.substring(0, i);
+            url = url.substring(i + 3);
+        } else {
+            i = url.indexOf(":/");
+            if (i >= 0) {
+                if (i == 0) throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+                protocol = url.substring(0, i);
+                url = url.substring(i + 1);
+            }
+        }
+
+        i = url.indexOf("/");
+        if (i >= 0) {
+            path = url.substring(i + 1);
+            url = url.substring(0, i);
+        }
+
+        i = url.indexOf(":");
+        if (i >= 0 && i < url.length() - 1) {
+            port = Integer.parseInt(url.substring(i + 1));
+            url = url.substring(0, i);
+        }
+        if (url.length() > 0) host = url;
+        return new URL(protocol, host, port,parameters.get(URLParamType.group.getName()),path, null);
     }
 
     public String getParameter(String name) {
@@ -96,7 +147,7 @@ public class URL {
     }
 
     public String getGroup() {
-        return group;
+        return getParameter(URLParamType.group.getName(),URLParamType.group.getValue());
     }
 
     public String getVersion() {

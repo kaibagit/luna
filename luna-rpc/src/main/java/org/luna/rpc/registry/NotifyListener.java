@@ -9,5 +9,5 @@ import java.util.List;
  */
 public interface NotifyListener {
 
-    void notify(URL registryUrl, List<URL> urls);
+    void notify(RegistryURL registryUrl, List<URL> urls);
 }

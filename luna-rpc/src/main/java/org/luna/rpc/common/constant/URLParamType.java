@@ -5,6 +5,8 @@ package org.luna.rpc.common.constant;
  */
 public enum URLParamType {
 
+    group("group", "default_group"),
+
     /** codec */
     codec("codec", "luna"),
 

@@ -12,6 +12,7 @@ import org.luna.rpc.protocol.FilterWrapperProtocol;
 import org.luna.rpc.protocol.Protocol;
 import org.luna.rpc.registry.Registry;
 import org.luna.rpc.registry.RegistryFactory;
+import org.luna.rpc.registry.RegistryURL;
 import org.luna.rpc.util.NetUtil;
 
 import java.net.InetAddress;
@@ -52,7 +53,7 @@ public class ServiceConfig<T> {
     private List<Exporter<T>> exporters = new CopyOnWriteArrayList<Exporter<T>>();
 
     public synchronized void export() {
-        List<URL> registryList = loadRegistryUrls();
+        List<RegistryURL> registryList = loadRegistryUrls();
 
         List<URL> urls = new ArrayList<>();
         for(ProtocolConfig protocol : protocols){
@@ -77,14 +78,14 @@ public class ServiceConfig<T> {
         return url;
     }
 
-    private Exporter<T> doExporter(Class<T> serviceClass, URL url, T ref, List<URL> registryList){
+    private Exporter<T> doExporter(Class<T> serviceClass, URL url, T ref, List<RegistryURL> registryList){
         Protocol protocol = ExtensionLoader.getExtension(Protocol.class,url.getProtocol());
         protocol = new FilterWrapperProtocol(protocol);
         Invoker<T> invoker = new DefaultInvoker<>(ref,url,serviceClass);
         Exporter<T> exporter = protocol.export(invoker, url);
 
         // register service
-        for(URL registryUrl : registryList){
+        for(RegistryURL registryUrl : registryList){
             RegistryFactory registryFactory = ExtensionLoader.getExtension(RegistryFactory.class,registryUrl.getProtocol());
             if(registryFactory == null){
                 throw new LunaRpcException("Register error! Could not find extension for registry protocol : "+registryUrl.getProtocol());
@@ -173,8 +174,8 @@ public class ServiceConfig<T> {
      * 加载注册URL
      * @return
      */
-    private List<URL> loadRegistryUrls(){
-        List<URL> registryList = new ArrayList<URL>();
+    private List<RegistryURL> loadRegistryUrls(){
+        List<RegistryURL> registryList = new ArrayList<>();
         if(registry != null){
             String address = registry.getAddress();
             String[] ipAndPortArr = address.split(",");
@@ -182,7 +183,7 @@ public class ServiceConfig<T> {
                 String[] arr = ipAndPort.split(":");
                 String ip = arr[0];
                 int port = Integer.valueOf(arr[1]);
-                URL url = new URL(registry.getRegProtocol(),ip,port,null,serviceClass.getName(),null);
+                RegistryURL url = new RegistryURL(registry.getRegProtocol(),ip,port);
                 registryList.add(url);
             }
         }

@@ -3,6 +3,7 @@ package org.luna.rpc.cluster.loadbalance;
 import org.luna.rpc.cluster.LoadBalance;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Invocation;
+import org.luna.rpc.core.LunaRpcException;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +24,9 @@ public class RoundRobinLoadBalance<T> implements LoadBalance<T> {
 
     @Override
     public Client<T> select(Invocation invocation) {
+        if(clients == null || clients.size() == 0){
+            throw new LunaRpcException(String.format("There are no providers of %s.",invocation.getServiceName()));
+        }
         int round = idx.getAndIncrement();
         return clients.get(round % clients.size());
     }

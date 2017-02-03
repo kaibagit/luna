@@ -8,6 +8,6 @@ import org.luna.rpc.core.URL;
  */
 public interface RegistryFactory {
 
-    Registry getRegistry(URL url);
+    Registry getRegistry(RegistryURL url);
 
 }

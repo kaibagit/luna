@@ -16,6 +16,7 @@ import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.Protocol;
 import org.luna.rpc.proxy.ProxyFactory;
+import org.luna.rpc.registry.RegistryURL;
 import org.luna.rpc.util.NetUtil;
 
 /**
@@ -73,7 +74,7 @@ public class ReferenceConfig<T> {
 
             client = directClusterClient;
         }else{
-            List<URL> registryList = loadRegistryUrls();
+            List<RegistryURL> registryList = loadRegistryUrls();
             InetAddress inetAddress = NetUtil.getLocalAddress();
             String hostAddress = inetAddress.getHostAddress();
             URL url = new URL(protocolName,hostAddress,0,group,serviceClass.getName(),version);
@@ -175,8 +176,8 @@ public class ReferenceConfig<T> {
      * 加载注册URL
      * @return
      */
-    private List<URL> loadRegistryUrls(){
-        List<URL> registryList = new ArrayList<URL>();
+    private List<RegistryURL> loadRegistryUrls(){
+        List<RegistryURL> registryList = new ArrayList<RegistryURL>();
         if(registry != null){
             String address = registry.getAddress();
             String[] ipAndPortArr = address.split(",");
@@ -184,7 +185,7 @@ public class ReferenceConfig<T> {
                 String[] arr = ipAndPort.split(":");
                 String ip = arr[0];
                 int port = Integer.valueOf(arr[1]);
-                URL url = new URL(registry.getRegProtocol(),ip,port,group,serviceClass.getName(),version);
+                RegistryURL url = new RegistryURL(registry.getRegProtocol(),ip,port);
                 registryList.add(url);
             }
         }

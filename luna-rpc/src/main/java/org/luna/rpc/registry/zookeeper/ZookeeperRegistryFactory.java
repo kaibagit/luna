@@ -7,6 +7,7 @@ import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.Spi;
 import org.luna.rpc.registry.Registry;
 import org.luna.rpc.registry.RegistryFactory;
+import org.luna.rpc.registry.RegistryURL;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,14 +23,14 @@ public class ZookeeperRegistryFactory implements RegistryFactory{
     private static final Object lock = new Object();
 
     @Override
-    public Registry getRegistry(URL url) {
-        String regisryUrl = String.format("%s://%s:%d",url.getProtocol(),url.getHost(),url.getPort());
-        Registry registry = registries.get(regisryUrl);
+    public Registry getRegistry(RegistryURL regisryUrl) {
+        String regisryUrlStr = regisryUrl.toString();
+        Registry registry = registries.get(regisryUrlStr);
         if(registry == null){
             synchronized (lock){
-                registry =  registries.get(regisryUrl);
+                registry =  registries.get(regisryUrlStr);
                 if(registry == null){
-                    String connectionString = String.format("%s:%d",url.getHost(),url.getPort());
+                    String connectionString = String.format("%s:%d",regisryUrl.getHost(),regisryUrl.getPort());
                     ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
                     CuratorFramework client = CuratorFrameworkFactory.builder().connectString(connectionString)
                             .retryPolicy(retryPolicy)
@@ -38,9 +39,9 @@ public class ZookeeperRegistryFactory implements RegistryFactory{
                             .sessionTimeoutMs(30000)
                             .build();
 
-                    ZookeeperRegistry zkRegistry = new ZookeeperRegistry(url,client);
+                    ZookeeperRegistry zkRegistry = new ZookeeperRegistry(regisryUrl,client);
                     zkRegistry.start();
-                    registries.put(regisryUrl,zkRegistry);
+                    registries.put(regisryUrlStr,zkRegistry);
 
                     registry = zkRegistry;
                 }

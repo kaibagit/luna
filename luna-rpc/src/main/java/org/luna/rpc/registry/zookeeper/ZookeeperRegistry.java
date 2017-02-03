@@ -12,6 +12,7 @@ import org.luna.rpc.core.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.registry.NotifyListener;
 import org.luna.rpc.registry.Registry;
+import org.luna.rpc.registry.RegistryURL;
 import org.luna.rpc.util.LoggerUtil;
 
 import java.util.ArrayList;
@@ -25,13 +26,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ZookeeperRegistry implements Registry,Lifecycle {
 
-    private URL url;
+    private RegistryURL url;
 
     private CuratorFramework client;
 
+    private Map<String,ZookeeperWatcherManager> watcherManagers = new ConcurrentHashMap<>();
+
     private Map<String,List<NotifyListener>> notifyListeners = new ConcurrentHashMap<>();
 
-    public ZookeeperRegistry(URL url,CuratorFramework client){
+    public ZookeeperRegistry(RegistryURL url,CuratorFramework client){
         this.url = url;
         this.client = client;
     }
@@ -73,19 +76,16 @@ public class ZookeeperRegistry implements Registry,Lifecycle {
     @Override
     public void subscribe(URL url, NotifyListener listener) {
         try{
-            List<NotifyListener> listenerList = notifyListeners.get(url.getService());
-            if(listenerList == null){
-                listenerList = new ArrayList<>();
-                notifyListeners.put(url.getService(),listenerList);
+            ZookeeperWatcherManager watcherManager = watcherManagers.get(url.toString());
+            if(watcherManager == null){
+                watcherManager = new ZookeeperWatcherManager(this.url,this.client,url);
+                watcherManagers.put(url.toString(),watcherManager);
+                String parentPath = String.format("/luna/%s/%s/providers",url.getGroup(),url.getService());
+                client.getChildren().usingWatcher(watcherManager).forPath(parentPath);
             }
-            String providerPath = String.format("/luna/%s/%s/providers",url.getGroup(),url.getService());
-            List<String> childrens = client.getChildren().usingWatcher(new Watcher() {
-                @Override
-                public void process(WatchedEvent event) {
-                    System.out.println("node is changed");
-                }
-            }).forPath(providerPath);
 
+            watcherManager.addNotifyListener(listener);
+            watcherManager.reflushProviders();
         }catch (Exception e){
             throw new LunaRpcException(String.format("Failed to subscribe %s to zookeeper(%s)",url,this.url),e);
         }

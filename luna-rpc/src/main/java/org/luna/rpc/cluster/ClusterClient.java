@@ -8,9 +8,11 @@ import org.luna.rpc.protocol.Protocol;
 import org.luna.rpc.registry.NotifyListener;
 import org.luna.rpc.registry.Registry;
 import org.luna.rpc.registry.RegistryFactory;
+import org.luna.rpc.registry.RegistryURL;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -23,13 +25,13 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
 
     private LoadBalance<T> loadBalance;
 
-    private List<URL> registryUrls;
+    private List<RegistryURL> registryUrls;
 
     private URL url;
 
     private ConcurrentHashMap<URL, List<Client<T>>> registryClients = new ConcurrentHashMap<>();
 
-    public ClusterClient(Class<T> serviceClass,URL url,List<URL> registryList){
+    public ClusterClient(Class<T> serviceClass,URL url,List<RegistryURL> registryList){
         this.serviceClass = serviceClass;
         this.url = url;
         this.registryUrls = registryList;
@@ -48,7 +50,7 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
 
     @Override
     public void start() {
-        for(URL registryUrl : registryUrls){
+        for(RegistryURL registryUrl : registryUrls){
             RegistryFactory registryFactory = ExtensionLoader.getExtension(RegistryFactory.class,registryUrl.getProtocol());
             if(registryFactory == null){
                 throw new LunaRpcException("There is no RegistryFactory extension named " + registryUrl.getProtocol());
@@ -60,11 +62,16 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
 
     @Override
     public void destory() {
-
+        for(Map.Entry<URL,List<Client<T>>> entry : registryClients.entrySet()){
+            List<Client<T>> clientList = entry.getValue();
+            for(Client<T> client : clientList){
+                client.destory();
+            }
+        }
     }
 
     @Override
-    public void notify(URL registryUrl, List<URL> urls) {
+    public void notify(RegistryURL registryUrl, List<URL> urls) {
         List<Client<T>> oldClients = registryClients.get(registryUrl);
         if(oldClients == null){
             oldClients = new ArrayList<>();
@@ -92,7 +99,7 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
         }
 
         registryClients.put(registryUrl,newClients);
-        loadBalance = new RoundRobinLoadBalance<T>(newClients);
+        loadBalance = new RoundRobinLoadBalance<>(newClients);
         for(Client<T> c : destoryClients){
             c.destory();
         }
