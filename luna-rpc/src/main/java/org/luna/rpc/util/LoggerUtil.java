@@ -27,6 +27,10 @@ public class LoggerUtil {
         logger.info(msg);
     }
 
+    public static void info(String format, Object... arguments){
+        logger.info(format,arguments);
+    }
+
     public static void warn(String msg) {
         logger.warn(msg);
     }

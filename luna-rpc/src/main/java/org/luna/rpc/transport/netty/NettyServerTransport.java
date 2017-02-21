@@ -1,6 +1,8 @@
 package org.luna.rpc.transport.netty;
 
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.LunaRpcException;
@@ -48,6 +50,9 @@ public class NettyServerTransport implements ServerTransport {
             return;
         }
         try{
+            int workerThrad = url.getIntParameter(URLParamType.workerThread.getName(),Integer.valueOf(URLParamType.workerThread.getValue()));
+            EventExecutorGroup eventExecutorGroup = new DefaultEventExecutorGroup(workerThrad);
+
             Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.getName(),URLParamType.codec.getValue()));
             ChannelInitializer<SocketChannel> channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
                 @Override
@@ -58,7 +63,7 @@ public class NettyServerTransport implements ServerTransport {
                     pipeline.addLast(new IdleStateHandler(READ_IDEL_TIME_OUT,
                             WRITE_IDEL_TIME_OUT, ALL_IDEL_TIME_OUT, TimeUnit.SECONDS));     //心跳触发handler
                     pipeline.addLast("heartbeatHandler",new HeartbeatServerHandler());      //心跳处理handler
-                    pipeline.addLast("handler", new NettyMessageHandler(NettyServerTransport.this,messageHandler));
+                    pipeline.addLast(eventExecutorGroup, new NettyMessageHandler(NettyServerTransport.this,messageHandler));
                     pipeline.addLast("errorHandler",new ExceptionHandler());
                 }
             };
@@ -71,7 +76,7 @@ public class NettyServerTransport implements ServerTransport {
                     .childHandler(channelChannelInitializer)
                     .bind(url.getPort()).sync();
             started = true;
-            LoggerUtil.info("NettyServerTransport started , ip="+url.getPort());
+            LoggerUtil.info("NettyServerTransport started , port = {} , workerThrad = {} .",url.getPort(),workerThrad);
         }catch (Exception e){
             throw new LunaRpcException("NettyServerTransport start fail .",e);
         }

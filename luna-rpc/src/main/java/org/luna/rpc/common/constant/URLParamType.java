@@ -19,6 +19,9 @@ public enum URLParamType {
     /** async */
     async("async","false"),
 
+    /** 工作线程，默认为CPU核数*2 */
+    workerThread("workerThread",Integer.valueOf(Runtime.getRuntime().availableProcessors() * 2).toString()),
+
     /** provider or consumer */
     side("side",null);
 

@@ -46,6 +46,9 @@ public class ServiceConfig<T> {
     /** service接口实现类 */
     private T ref;
 
+    /** 提供Service的Worker Thread */
+    private Integer workerThread;
+
     public List<ProtocolConfig> getProtocols() {
         return protocols;
     }
@@ -75,6 +78,9 @@ public class ServiceConfig<T> {
         URL url = new URL(protocol.getName(),hostAddress,protocol.getPort(),group,serviceClass.getName(),version);
         url.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
         url.addParameter(URLParamType.side.getName(),Constraint.SIDE_PROVIDER);
+        if(workerThread != null){
+            url.addParameter(URLParamType.workerThread.getName(),workerThread.toString());
+        }
         return url;
     }
 
@@ -168,6 +174,13 @@ public class ServiceConfig<T> {
 
     public void setRegistry(RegistryConfig registry) {
         this.registry = registry;
+    }
+
+    public void setWorkerThread(Integer workerThread) {
+        if(workerThread == null || workerThread <= 0){
+            throw new IllegalArgumentException("illegal workerThread = "+workerThread);
+        }
+        this.workerThread = workerThread;
     }
 
     /**
