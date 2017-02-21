@@ -33,6 +33,8 @@ public class NettyServerTransport implements ServerTransport {
 
     private ServerBootstrap serverBootstrap;
 
+    private EventExecutorGroup eventExecutorGroup;
+
     private volatile boolean started = false;
 
     private static final int READ_IDEL_TIME_OUT = 30; // 读超时
@@ -51,7 +53,7 @@ public class NettyServerTransport implements ServerTransport {
         }
         try{
             int workerThrad = url.getIntParameter(URLParamType.workerThread.getName(),Integer.valueOf(URLParamType.workerThread.getValue()));
-            EventExecutorGroup eventExecutorGroup = new DefaultEventExecutorGroup(workerThrad);
+            eventExecutorGroup = new DefaultEventExecutorGroup(workerThrad);
 
             Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.getName(),URLParamType.codec.getValue()));
             ChannelInitializer<SocketChannel> channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
@@ -86,6 +88,7 @@ public class NettyServerTransport implements ServerTransport {
     public void destory() {
         serverBootstrap.group().shutdownGracefully();
         serverBootstrap.childGroup().shutdownGracefully();
+        eventExecutorGroup.shutdownGracefully();
     }
 
     @Override
