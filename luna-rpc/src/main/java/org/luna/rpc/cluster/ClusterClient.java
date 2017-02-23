@@ -2,6 +2,7 @@ package org.luna.rpc.cluster;
 
 import org.luna.rpc.cluster.loadbalance.RoundRobinLoadBalance;
 import org.luna.rpc.core.*;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.FilterWrapperProtocol;
 import org.luna.rpc.protocol.Protocol;

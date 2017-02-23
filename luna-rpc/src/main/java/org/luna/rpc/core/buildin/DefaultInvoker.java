@@ -3,6 +3,7 @@ package org.luna.rpc.core.buildin;
 import java.lang.reflect.Method;
 
 import org.luna.rpc.core.*;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.util.LoggerUtil;
 
 /**

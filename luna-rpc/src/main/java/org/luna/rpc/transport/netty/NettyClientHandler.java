@@ -5,13 +5,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.Response;
 import org.luna.rpc.transport.ResponseFuture;
 import org.luna.rpc.util.LoggerUtil;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by luliru on 2016/11/19.

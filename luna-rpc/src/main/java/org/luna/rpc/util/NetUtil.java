@@ -1,6 +1,6 @@
 package org.luna.rpc.util;
 
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 
 import java.net.InetAddress;
 

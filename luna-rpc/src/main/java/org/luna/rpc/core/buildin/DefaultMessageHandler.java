@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.luna.rpc.core.Invocation;
 import org.luna.rpc.core.Invoker;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.protocol.MessageHandler;
 import org.luna.rpc.transport.Transport;

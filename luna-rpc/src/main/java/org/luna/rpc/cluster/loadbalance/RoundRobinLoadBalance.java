@@ -3,7 +3,7 @@ package org.luna.rpc.cluster.loadbalance;
 import org.luna.rpc.cluster.LoadBalance;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Invocation;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

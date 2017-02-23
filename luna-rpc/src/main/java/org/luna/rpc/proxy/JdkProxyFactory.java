@@ -1,10 +1,9 @@
 package org.luna.rpc.proxy;
 
 import org.luna.rpc.core.*;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.extension.Spi;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**

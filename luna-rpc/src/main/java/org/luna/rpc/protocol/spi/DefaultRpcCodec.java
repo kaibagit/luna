@@ -7,7 +7,7 @@ import java.util.Map;
 import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Invocation;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.buildin.DefaultRpcInvocation;
 import org.luna.rpc.core.extension.ExtensionLoader;

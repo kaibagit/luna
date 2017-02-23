@@ -4,7 +4,7 @@ import org.luna.rpc.common.constant.Constraint;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Exporter;
 import org.luna.rpc.core.Invoker;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.buildin.DefaultInvoker;
 import org.luna.rpc.core.extension.ExtensionLoader;

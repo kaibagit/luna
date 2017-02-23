@@ -1,7 +1,7 @@
 package org.luna.rpc.transport;
 
 import org.luna.rpc.core.Invocation;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

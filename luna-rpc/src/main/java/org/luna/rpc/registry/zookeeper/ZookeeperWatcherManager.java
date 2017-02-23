@@ -3,14 +3,13 @@ package org.luna.rpc.registry.zookeeper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.registry.NotifyListener;
 import org.luna.rpc.registry.RegistryURL;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by kaiba on 2017/2/1.

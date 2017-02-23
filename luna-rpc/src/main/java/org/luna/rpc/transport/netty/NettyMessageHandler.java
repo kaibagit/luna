@@ -1,6 +1,6 @@
 package org.luna.rpc.transport.netty;
 
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.protocol.MessageHandler;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.Response;

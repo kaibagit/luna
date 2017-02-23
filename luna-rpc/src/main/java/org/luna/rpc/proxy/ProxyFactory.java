@@ -1,9 +1,7 @@
 package org.luna.rpc.proxy;
 
 import org.luna.rpc.core.Client;
-import org.luna.rpc.core.Invoker;
-import org.luna.rpc.core.LunaRpcException;
-import org.luna.rpc.core.URL;
+import org.luna.rpc.core.exception.LunaRpcException;
 
 /**
  * Created by luliru on 2016/10/14.

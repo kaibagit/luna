@@ -8,16 +8,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
-import org.luna.rpc.core.LunaRpcException;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.transport.ClientTransport;
 import org.luna.rpc.transport.Request;
-import org.luna.rpc.transport.Response;
 import org.luna.rpc.transport.ResponseFuture;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
