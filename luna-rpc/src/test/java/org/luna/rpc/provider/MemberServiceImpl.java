@@ -2,6 +2,8 @@ package org.luna.rpc.provider;
 
 import org.luna.rpc.api.Member;
 import org.luna.rpc.api.MemberService;
+import org.luna.rpc.api.MemberSuspendException;
+import org.luna.rpc.core.exception.RateLimitingException;
 
 import java.util.*;
 
@@ -27,5 +29,21 @@ public class MemberServiceImpl implements MemberService {
         Map<String,Object> map = new HashMap<>();
         map.put("name","luliru");
         return map;
+    }
+
+    @Override
+    public String getByIdThrowUnknowException(int id) {
+        throw new EmbeddedMemberException();
+//        return null;
+    }
+
+    @Override
+    public String getByIdThrowSpecifiedException(int id) {
+        throw new MemberSuspendException();
+    }
+
+    @Override
+    public String getByIdThrowRpcException(int id) {
+        throw new RateLimitingException();
     }
 }

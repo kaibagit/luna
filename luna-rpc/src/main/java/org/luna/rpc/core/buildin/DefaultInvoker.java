@@ -48,8 +48,14 @@ public class DefaultInvoker<T> implements Invoker<T> {
             Object value = method.invoke(proxyImpl,invocation.getArguments());
             result.setValue(value);
         } catch (Exception e) {
-            LoggerUtil.error("Exception caught when method invoke",e);
-            result.setException(e);
+            if (e.getCause() != null) {
+                Exception cause = (Exception) e.getCause();
+                LoggerUtil.error("Exception caught when method invoke: " + cause);
+                result.setException(cause);
+            } else {
+                LoggerUtil.error("Exception caught when method invoke",e);
+                result.setException(e);
+            }
         }
         return result;
     }

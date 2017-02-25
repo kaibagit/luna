@@ -110,20 +110,28 @@ public class DefaultRpcCodec implements Codec {
                 response.setHeartbeat(true);
             }else{
                 byte status = buffer.getByte(3);
-                if(status != STATUS_VOID){
+                if(status == STATUS_OK){
                     byte[] body = new byte[bodyLength];
                     buffer.getBytes(HEAD_LENGTH,body,0,bodyLength);
                     try{
                         Object result = decodeResponseBody(transport,body);
-                        if( status == STATUS_OK){
-                            response.setValue(result);
-                        }else{
-                            response.setException((Exception)result);
-                        }
+                        response.setValue(result);
                     }catch (ClassNotFoundException e){
-                        throw new LunaRpcException("Class not find",e);
+                        throw new LunaRpcException("Class not found when decode from remote response",e);
                     }
+                }else if(status == STATUS_EXCEPTION){
+                    byte[] body = new byte[bodyLength];
+                    buffer.getBytes(HEAD_LENGTH,body,0,bodyLength);
+                    Exception remoteException = null;
+                    try{
+                        remoteException = (Exception) decodeResponseBody(transport,body);
+                    }catch (ClassNotFoundException e){
+                        String notFoundClassName = e.getMessage();
+                        remoteException = new LunaRpcException("Remote throws "+ notFoundClassName);
+                    }
+                    response.setException(remoteException);
                 }
+
             }
 
             buffer.readBytes(bodyLength);

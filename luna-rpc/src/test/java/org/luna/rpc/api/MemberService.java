@@ -14,4 +14,10 @@ public interface MemberService {
     List<Member> findByParams(boolean sex, Date joinDate,List<Integer> excludeIds);
 
     Map<String,Object> getDescription(int id);
+
+    String getByIdThrowUnknowException(int id);
+
+    String getByIdThrowSpecifiedException(int id);
+
+    String getByIdThrowRpcException(int id);
 }
