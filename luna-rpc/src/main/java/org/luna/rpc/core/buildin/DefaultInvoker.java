@@ -50,10 +50,10 @@ public class DefaultInvoker<T> implements Invoker<T> {
         } catch (Exception e) {
             if (e.getCause() != null) {
                 Exception cause = (Exception) e.getCause();
-                LoggerUtil.error("Exception caught when method invoke: " + cause);
+                LoggerUtil.error("Exception caught when method invoke .",cause);
                 result.setException(cause);
             } else {
-                LoggerUtil.error("Exception caught when method invoke",e);
+                LoggerUtil.error("Exception caught when method invoke .",e);
                 result.setException(e);
             }
         }

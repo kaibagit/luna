@@ -20,4 +20,6 @@ public interface MemberService {
     String getByIdThrowSpecifiedException(int id);
 
     String getByIdThrowRpcException(int id);
+
+    String getByIdThrowJvmException(Integer id);
 }

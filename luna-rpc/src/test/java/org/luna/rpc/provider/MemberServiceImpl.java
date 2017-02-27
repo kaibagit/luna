@@ -1,11 +1,11 @@
 package org.luna.rpc.provider;
 
+import java.util.*;
+
 import org.luna.rpc.api.Member;
 import org.luna.rpc.api.MemberService;
 import org.luna.rpc.api.MemberSuspendException;
 import org.luna.rpc.core.exception.RateLimitingException;
-
-import java.util.*;
 
 /**
  * Created by luliru on 2016/11/25.
@@ -45,5 +45,10 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public String getByIdThrowRpcException(int id) {
         throw new RateLimitingException();
+    }
+
+    @Override
+    public String getByIdThrowJvmException(Integer id) {
+        throw new IllegalArgumentException("id 不能为空");
     }
 }
