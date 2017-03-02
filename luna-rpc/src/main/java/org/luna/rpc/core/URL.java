@@ -119,6 +119,14 @@ public class URL {
         return Long.valueOf(stringValue);
     }
 
+    public Double getDoubleParameter(String name){
+        String stringValue = parameters.get(name);
+        if(stringValue == null || stringValue.trim().length() == 0){
+            return null;
+        }
+        return Double.valueOf(stringValue);
+    }
+
     public Boolean getBooleanParameter(String name,boolean defaultValue){
         String stringValue = parameters.get(name);
         if(stringValue == null || stringValue.trim().length() == 0){

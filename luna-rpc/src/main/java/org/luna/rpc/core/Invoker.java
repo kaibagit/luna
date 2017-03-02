@@ -6,6 +6,4 @@ package org.luna.rpc.core;
 public interface Invoker<T> extends Caller<T>{
 
     Class<T> getInterface();
-
-    URL getUrl();
 }

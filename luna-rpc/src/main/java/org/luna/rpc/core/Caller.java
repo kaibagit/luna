@@ -6,4 +6,6 @@ package org.luna.rpc.core;
 public interface Caller<T> {
 
     public Result call(Invocation invocation);
+
+    URL getUrl();
 }

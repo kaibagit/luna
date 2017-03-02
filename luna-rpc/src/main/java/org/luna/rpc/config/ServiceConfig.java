@@ -10,6 +10,7 @@ import org.luna.rpc.core.buildin.DefaultInvoker;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.FilterWrapperProtocol;
 import org.luna.rpc.protocol.Protocol;
+import org.luna.rpc.protocol.RateLimitingProtocol;
 import org.luna.rpc.registry.Registry;
 import org.luna.rpc.registry.RegistryFactory;
 import org.luna.rpc.registry.RegistryURL;
@@ -46,6 +47,9 @@ public class ServiceConfig<T> {
     /** service接口实现类 */
     private T ref;
 
+    /** 服务限流 */
+    private Double rateLimit;
+
     /** 提供Service的Worker Thread */
     private Integer workerThread;
 
@@ -78,6 +82,9 @@ public class ServiceConfig<T> {
         URL url = new URL(protocol.getName(),hostAddress,protocol.getPort(),group,serviceClass.getName(),version);
         url.addParameter(URLParamType.serialize.name(),protocol.getSerialization());
         url.addParameter(URLParamType.side.getName(),Constraint.SIDE_PROVIDER);
+        if(rateLimit != null){
+            url.addParameter(URLParamType.rateLimit.getName(),rateLimit.toString());
+        }
         if(workerThread != null){
             url.addParameter(URLParamType.workerThread.getName(),workerThread.toString());
         }
@@ -87,6 +94,7 @@ public class ServiceConfig<T> {
     private Exporter<T> doExporter(Class<T> serviceClass, URL url, T ref, List<RegistryURL> registryList){
         Protocol protocol = ExtensionLoader.getExtension(Protocol.class,url.getProtocol());
         protocol = new FilterWrapperProtocol(protocol);
+        protocol = new RateLimitingProtocol(protocol);
         Invoker<T> invoker = new DefaultInvoker<>(ref,url,serviceClass);
         Exporter<T> exporter = protocol.export(invoker, url);
 
@@ -181,6 +189,10 @@ public class ServiceConfig<T> {
             throw new IllegalArgumentException("illegal workerThread = "+workerThread);
         }
         this.workerThread = workerThread;
+    }
+
+    public void setRateLimit(Double rateLimit) {
+        this.rateLimit = rateLimit;
     }
 
     /**

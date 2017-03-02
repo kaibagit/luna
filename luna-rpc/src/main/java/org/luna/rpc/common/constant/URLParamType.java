@@ -19,19 +19,29 @@ public enum URLParamType {
     /** async */
     async("async","false"),
 
+    /** 限速，单位：个/秒 */
+    rateLimit("rateLimit",""),
+
     /** 工作线程，默认为CPU核数*2 */
-    workerThread("workerThread",Integer.valueOf(Runtime.getRuntime().availableProcessors() * 2).toString()),
+    workerThread("workerThread",Runtime.getRuntime().availableProcessors() * 2),
 
     /** provider or consumer */
-    side("side",null);
+    side("side","");
 
     private String name;
 
     private String value;
 
-    private URLParamType(String name, String value) {
+    URLParamType(String name, String value) {
         this.name = name;
         this.value = value;
+    }
+
+    URLParamType(String namem, Integer value){
+        this.name = namem;
+        if(value != null){
+            this.value = value.toString();
+        }
     }
 
     public String getName() {
