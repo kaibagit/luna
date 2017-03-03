@@ -14,10 +14,16 @@ import io.netty.handler.timeout.IdleStateEvent;
  */
 public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println(ctx.channel().remoteAddress());
+        ctx.fireChannelRegistered();
+    }
+
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if(evt instanceof IdleStateEvent){
             IdleStateEvent event = (IdleStateEvent) evt;
-            if(event.state() == IdleState.READER_IDLE){
+            if(event.state() == IdleState.ALL_IDLE){
                 Channel channel = ctx.channel();
                 LoggerUtil.info("Remote "+channel.remoteAddress()+" is timeout. Channel is closed.");
                 ctx.channel().close();
