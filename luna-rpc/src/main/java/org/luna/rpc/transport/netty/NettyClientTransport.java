@@ -6,6 +6,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.exception.LunaRpcException;
@@ -15,6 +16,8 @@ import org.luna.rpc.transport.ClientTransport;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.ResponseFuture;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,6 +38,8 @@ public class NettyClientTransport implements ClientTransport {
     private static final int WRITE_IDEL_TIME_OUT = 7;// 写超时
     private static final int ALL_IDEL_TIME_OUT = 9; // 所有超时
 
+    private GenericObjectPool channelPool;
+
     public NettyClientTransport(URL url){
         this.url = url;
     }
@@ -50,6 +55,9 @@ public class NettyClientTransport implements ClientTransport {
             return;
         }
         try{
+            int minConnections = url.getIntParameter(URLParamType.minClientConnection.getName(),URLParamType.minClientConnection.getIntValue());
+            int maxConnection = url.getIntParameter(URLParamType.maxClientConnection.getName(),URLParamType.maxClientConnection.getIntValue());
+
             Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.getName(),URLParamType.codec.getValue()));
             ChannelInitializer<SocketChannel> channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
                 @Override
@@ -68,7 +76,20 @@ public class NettyClientTransport implements ClientTransport {
             b.group(group).channel(NioSocketChannel.class)
                     .handler(channelChannelInitializer);
 
-            channel = b.connect(url.getHost(), url.getPort()).sync().channel();
+            GenericObjectPool.Config config = new GenericObjectPool.Config();
+            config.minIdle = minConnections;
+            config.maxActive = maxConnection;
+            config.maxWait = 30000;
+            channelPool = new GenericObjectPool(new NettyChannelFactory(url,b),config);
+
+            //init channel
+            List<Channel> initChannelList = new ArrayList<>();
+            for(int i=0;i<minConnections;i++){
+                initChannelList.add((Channel) channelPool.borrowObject());
+            }
+            for(Channel channel : initChannelList){
+                channelPool.returnObject(channel);
+            }
         }catch (Exception e){
             throw new LunaRpcException("NettyClientTransport start error .",e);
         }
@@ -82,9 +103,15 @@ public class NettyClientTransport implements ClientTransport {
 
     @Override
     public ResponseFuture send(Request request) {
-        long timeout = getUrl().getLongParameter(URLParamType.requestTimeout.name(),URLParamType.requestTimeout.getLongValue());
-        ResponseFuture future = new ResponseFuture(request,timeout);
-        channel.writeAndFlush(request);
-        return future;
+        try {
+            Channel channel = (Channel) channelPool.borrowObject();
+            long timeout = getUrl().getLongParameter(URLParamType.requestTimeout.name(),URLParamType.requestTimeout.getLongValue());
+            ResponseFuture future = new ResponseFuture(request,timeout);
+            channel.writeAndFlush(request);
+            channelPool.returnObject(channel);
+            return future;
+        } catch (Exception e) {
+            throw new LunaRpcException("",e);
+        }
     }
 }

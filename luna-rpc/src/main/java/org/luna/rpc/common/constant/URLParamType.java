@@ -25,6 +25,11 @@ public enum URLParamType {
     /** 工作线程，默认为CPU核数*2 */
     workerThread("workerThread",Runtime.getRuntime().availableProcessors() * 2),
 
+    /** pool min conn number **/
+    minClientConnection("minClientConnection", 2),
+    /** pool max conn number **/
+    maxClientConnection("maxClientConnection", 10),
+
     /** provider or consumer */
     side("side","");
 
@@ -50,6 +55,10 @@ public enum URLParamType {
 
     public String getValue() {
         return value;
+    }
+
+    public int getIntValue(){
+        return Integer.valueOf(value);
     }
 
     public long getLongValue() {

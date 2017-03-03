@@ -30,7 +30,7 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if(evt instanceof IdleStateEvent){
             Channel channel = ctx.channel();
-            LoggerUtil.debug("Trigger heartbeat to "+channel.remoteAddress());
+            LoggerUtil.debug("Trigger heartbeat from "+channel.localAddress()+" to "+channel.remoteAddress());
 
             IdleStateEvent event = (IdleStateEvent) evt;
             if(event.state() == IdleState.WRITER_IDLE){
