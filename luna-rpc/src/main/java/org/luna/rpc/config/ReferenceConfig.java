@@ -45,6 +45,9 @@ public class ReferenceConfig<T> {
     /** 注册中心 */
     private RegistryConfig registry;
 
+    private Integer minConnection;
+    private Integer maxConnection;
+
     private T ref;
 
     public synchronized  void initRef(){
@@ -139,6 +142,12 @@ public class ReferenceConfig<T> {
             String str = String.format("methods.%s.%s",method.getName(),URLParamType.async.getName());
             refUrl.addParameter(str,String.valueOf(method.isAsync()));
         }
+        if(minConnection != null){
+            refUrl.addParameter(URLParamType.minClientConnection.getName(),minConnection);
+        }
+        if(maxConnection != null){
+            refUrl.addParameter(URLParamType.maxClientConnection.getName(),maxConnection);
+        }
     }
 
     /**
@@ -218,5 +227,13 @@ public class ReferenceConfig<T> {
 
     public void setRegistry(RegistryConfig registry) {
         this.registry = registry;
+    }
+
+    public void setMinConnection(Integer minConnection) {
+        this.minConnection = minConnection;
+    }
+
+    public void setMaxConnection(Integer maxConnection) {
+        this.maxConnection = maxConnection;
     }
 }

@@ -170,6 +170,13 @@ public class URL {
         parameters.put(name, value);
     }
 
+    public void addParameter(String name, Integer value){
+        if(StringUtils.isEmpty(name) || value == null){
+            return;
+        }
+        parameters.put(name,value.toString());
+    }
+
     public String toString(){
         return String.format("%s://%s:%d/%s",protocol,host,port,service);
     }
