@@ -22,6 +22,9 @@ public enum URLParamType {
     /** 限速，单位：个/秒 */
     rateLimit("rateLimit",""),
 
+    /** 权重 */
+    weight("weight",100),
+
     /** 工作线程，默认为CPU核数*2 */
     workerThread("workerThread",Runtime.getRuntime().availableProcessors() * 2),
 
