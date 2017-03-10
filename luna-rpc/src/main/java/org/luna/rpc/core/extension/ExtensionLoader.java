@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExtensionLoader<T> {
 
-    private static Map<Class,Map<String,Object>> cache = new ConcurrentHashMap<>();
+    private static Map<Class,Map<String,Object>> shareMap = new ConcurrentHashMap<>();
 
     public static <T>List<T> getExtensions(Class<T> type){
         Map<String,Object> typeMap = getTypeMap(type);
@@ -32,20 +32,42 @@ public class ExtensionLoader<T> {
     }
 
     public static <T> T getExtension(Class<T> type,String name){
-        Map<String,Object> typeMap = getTypeMap(type);
-        return (T) typeMap.get(name);
+        return getExtension(type,name,true);
+    }
+
+    /**
+     * 获取扩展
+     * @param type 扩展Class
+     * @param name 扩展name
+     * @param sharable 是否共享
+     * @param <T>
+     * @return
+     */
+    public static <T> T getExtension(Class<T> type,String name,boolean sharable){
+        if(sharable){
+            Map<String,Object> typeMap = getTypeMap(type);
+            return (T) typeMap.get(name);
+        }
+        for(T t : ServiceLoader.load(type)){
+            Spi annotation = t.getClass().getAnnotation(Spi.class);
+            String spiName = annotation != null ? annotation.name() : "default";
+            if(name.equals(spiName)){
+                return t;
+            }
+        }
+        return null;
     }
 
     private static <T> Map<String,Object> getTypeMap(Class<T> type){
         synchronized (type){
-            Map<String,Object> typeMap = cache.get(type);
+            Map<String,Object> typeMap = shareMap.get(type);
             if(typeMap == null){
                 typeMap = new ConcurrentHashMap<>();
-                cache.put(type,typeMap);
+                shareMap.put(type,typeMap);
                 for(T t : ServiceLoader.load(type)){
                     Spi annotation = t.getClass().getAnnotation(Spi.class);
-                    String name = annotation != null ? annotation.name() : "default";
-                    typeMap.put(name,t);
+                    String spiName = annotation != null ? annotation.name() : "default";
+                    typeMap.put(spiName,t);
                 }
             }
             return typeMap;
