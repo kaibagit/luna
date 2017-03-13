@@ -47,6 +47,8 @@ public class ReferenceConfig<T> {
 
     private Integer minConnection;
     private Integer maxConnection;
+    /** 负载均衡算法 */
+    private String loadBalance;
 
     private T ref;
 
@@ -148,6 +150,9 @@ public class ReferenceConfig<T> {
         if(maxConnection != null){
             refUrl.addParameter(URLParamType.maxClientConnection.getName(),maxConnection);
         }
+        if(StringUtils.isNotBlank(loadBalance)){
+            refUrl.addParameter(URLParamType.loadBalance.getName(),loadBalance.trim());
+        }
     }
 
     /**
@@ -235,5 +240,9 @@ public class ReferenceConfig<T> {
 
     public void setMaxConnection(Integer maxConnection) {
         this.maxConnection = maxConnection;
+    }
+
+    public void setLoadBalance(String loadBalance) {
+        this.loadBalance = loadBalance;
     }
 }

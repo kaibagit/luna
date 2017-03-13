@@ -1,7 +1,15 @@
 package org.luna.rpc.cluster;
 
-import org.luna.rpc.cluster.loadbalance.RoundRobinLoadBalance;
-import org.luna.rpc.core.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.luna.rpc.common.constant.URLParamType;
+import org.luna.rpc.core.Client;
+import org.luna.rpc.core.Invocation;
+import org.luna.rpc.core.Result;
+import org.luna.rpc.core.URL;
 import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.FilterWrapperProtocol;
@@ -10,11 +18,6 @@ import org.luna.rpc.registry.NotifyListener;
 import org.luna.rpc.registry.Registry;
 import org.luna.rpc.registry.RegistryFactory;
 import org.luna.rpc.registry.RegistryURL;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 支持集群的Client
@@ -51,6 +54,11 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
 
     @Override
     public void start() {
+        String loadBlanceName = url.getParameter(URLParamType.loadBalance.getName(),URLParamType.loadBalance.getValue());
+        loadBalance = ExtensionLoader.getExtension(LoadBalance.class,loadBlanceName,false);
+        if(loadBalance == null){
+            throw new NullPointerException("Can't found "+loadBlanceName);
+        }
         for(RegistryURL registryUrl : registryUrls){
             RegistryFactory registryFactory = ExtensionLoader.getExtension(RegistryFactory.class,registryUrl.getProtocol());
             if(registryFactory == null){
@@ -100,7 +108,7 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
         }
 
         registryClients.put(registryUrl,newClients);
-        loadBalance = new RoundRobinLoadBalance<>(newClients);
+        loadBalance.onRefresh(newClients);
         for(Client<T> c : destoryClients){
             c.destory();
         }

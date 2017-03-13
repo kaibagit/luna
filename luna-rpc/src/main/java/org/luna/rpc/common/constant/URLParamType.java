@@ -25,6 +25,9 @@ public enum URLParamType {
     /** 权重 */
     weight("weight",100),
 
+    /** 负载均衡，默认根据权重配置 */
+    loadBalance("loadBalance","weightLoadBalance"),
+
     /** 工作线程，默认为CPU核数*2 */
     workerThread("workerThread",Runtime.getRuntime().availableProcessors() * 2),
 

@@ -8,11 +8,13 @@ import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Invocation;
 import org.luna.rpc.core.URL;
+import org.luna.rpc.core.extension.Spi;
 
 /**
  * 支持权重的负载均衡
  * Created by luliru on 2017/3/9.
  */
+@Spi(name="weightLoadBalance")
 public class WeightLoadBalance<T> implements LoadBalance<T> {
 
     private List<Client<T>> clients;
@@ -21,19 +23,10 @@ public class WeightLoadBalance<T> implements LoadBalance<T> {
 
     private int totalWeight = 0;
 
-    public WeightLoadBalance(List<Client<T>> clients){
-        this.clients = clients;
+    public WeightLoadBalance(){}
 
-        Integer lastestWeight = null;
-        for(Client client : clients){
-            URL url = client.getUrl();
-            int weight = url.getIntParameter(URLParamType.weight.getName(),URLParamType.weight.getIntValue());
-            totalWeight += weight;
-            if(sameWeight && lastestWeight != null && lastestWeight != weight){
-                sameWeight = false;
-            }
-            lastestWeight = weight;
-        }
+    public WeightLoadBalance(List<Client<T>> clients){
+        init(clients);
     }
 
     @Override
@@ -51,5 +44,25 @@ public class WeightLoadBalance<T> implements LoadBalance<T> {
             }
         }
         return null;
+    }
+
+    @Override
+    public void onRefresh(List<Client<T>> clients) {
+        init(clients);
+    }
+
+    private void init(List<Client<T>> clients){
+        this.clients = clients;
+
+        Integer lastestWeight = null;
+        for(Client client : clients){
+            URL url = client.getUrl();
+            int weight = url.getIntParameter(URLParamType.weight.getName(),URLParamType.weight.getIntValue());
+            totalWeight += weight;
+            if(sameWeight && lastestWeight != null && lastestWeight != weight){
+                sameWeight = false;
+            }
+            lastestWeight = weight;
+        }
     }
 }

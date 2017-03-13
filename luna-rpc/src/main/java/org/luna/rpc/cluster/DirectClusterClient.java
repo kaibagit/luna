@@ -3,7 +3,7 @@ package org.luna.rpc.cluster;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.luna.rpc.cluster.loadbalance.RoundRobinLoadBalance;
+import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Invocation;
 import org.luna.rpc.core.Result;
@@ -57,7 +57,12 @@ public class DirectClusterClient<T> implements Client<T> {
             Client<T> client = protocol.refer(serviceClass,directUrl);
             clients.add(client);
         }
-        loadBalance = new RoundRobinLoadBalance<T>(clients);
+        String loadBlanceName = url.getParameter(URLParamType.loadBalance.getName(),URLParamType.loadBalance.getValue());
+        loadBalance = ExtensionLoader.getExtension(LoadBalance.class,loadBlanceName,false);
+        if(loadBalance == null){
+            throw new NullPointerException("Can't found "+loadBlanceName);
+        }
+        loadBalance.onRefresh(clients);
     }
 
     @Override
