@@ -31,11 +31,44 @@ body_length 长度为32位
 - 轮询
 - 根据权重负载均衡
 
+## 支持多种注册方式
+- Zookeeper
+- Consul（未来支持...）
+- 直连（用于调试）
 
+## 服务治理功能
+- 限流（目前支持单节点限流、不支持全局限流）
+
+## Rpc调用释意图
+```
++---------------------+              +---------------------+
+|     ServiceProxy    |              |     ServiceImpl     |
++---------------------+              +---------------------+
+           |                                    ^
+           |                                    |
+           v                                    |
++---------------------+              +---------------------+
+|        Client       |              |        Invoker      |
++---------------------+              +---------------------+
+           |                                    ^
+           | filter chain                       | filter chain
+           v                                    |
++---------------------+              +---------------------+
+|       Protocol      |              |    MessageHandler   |
++---------------------+              +---------------------+
+           |                                    ^
+           | encode                             | decode
+           v                                    |
++---------------------+              +---------------------+
+|   ClientTransprot   | -----------> |    ServerTransport  |
++---------------------+              +---------------------+
+```
 
 ## To-do List
+- [ ] 支持failover
 - [ ] LeastActiveLoadBalance
 - [ ] 支持跨语言
+- [ ] SpringPlugin
 
 ### 跨语言数据类型设计
 |框架定义数据类型|Java|Javascript|Php|Ruby|python|C
@@ -51,4 +84,4 @@ body_length 长度为32位
 |object|Object|Object|Object|Object|Obejct|struct
 |list|List|Array|Array|Array|List|array
 |hash|Map|Object|Array|Hash|Dictionary|array
-|exception|Exception|exception||StandardError
+|exception|Exception|exception| |StandardError
