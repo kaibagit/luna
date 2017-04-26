@@ -39,6 +39,9 @@ body_length 长度为32位
 ## 服务治理功能
 - 限流（目前支持单节点限流、不支持全局限流）
 
+## 其他功能
+- 异步调用
+
 ## Rpc调用释意图
 ```
 +---------------------+              +---------------------+
@@ -69,6 +72,7 @@ body_length 长度为32位
 - [ ] LeastActiveLoadBalance
 - [ ] 支持跨语言
 - [ ] SpringPlugin
+- [ ] OneWay支持
 
 ### 跨语言数据类型设计
 |框架定义数据类型|Java|Javascript|Php|Ruby|python|C
