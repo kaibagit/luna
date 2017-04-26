@@ -76,8 +76,8 @@ public class NettyServerTransport implements ServerTransport {
             serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY,true)
                     .childHandler(channelChannelInitializer)
+                    .childOption(ChannelOption.TCP_NODELAY,true)
                     .bind(url.getPort()).sync();
             started = true;
             LoggerUtil.info("NettyServerTransport started , port = {} , workerThrad = {} .",url.getPort(),workerThrad);

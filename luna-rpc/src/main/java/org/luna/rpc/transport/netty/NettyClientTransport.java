@@ -74,7 +74,8 @@ public class NettyClientTransport implements ClientTransport {
             group = new NioEventLoopGroup();
             Bootstrap b = new Bootstrap();
             b.group(group).channel(NioSocketChannel.class)
-                    .handler(channelChannelInitializer);
+                    .handler(channelChannelInitializer)
+                    .option(ChannelOption.TCP_NODELAY,true);
 
             GenericObjectPool.Config config = new GenericObjectPool.Config();
             config.minIdle = minConnections;
