@@ -1,5 +1,6 @@
 package org.luna.rpc.transport.netty;
 
+import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -75,6 +76,7 @@ public class NettyServerTransport implements ServerTransport {
             serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.TCP_NODELAY,true)
                     .childHandler(channelChannelInitializer)
                     .bind(url.getPort()).sync();
             started = true;

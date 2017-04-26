@@ -78,6 +78,7 @@ public class DefaultRpcCodec implements Codec {
             return null;
         }
 
+        //已读取的索引指向header末尾
         buffer.readBytes(HEAD_LENGTH);
 
         byte flag = buffer.getByte(2);
@@ -100,6 +101,7 @@ public class DefaultRpcCodec implements Codec {
                 }
             }
 
+            //已读取的索引指向body末尾
             buffer.readBytes(bodyLength);
 
             return request;
