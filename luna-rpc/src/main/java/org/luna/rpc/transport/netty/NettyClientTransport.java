@@ -34,7 +34,7 @@ public class NettyClientTransport implements ClientTransport {
     /** 是否已启动 */
     private volatile boolean started = false;
 
-    private static final int READ_IDEL_TIME_OUT = 0; // 读超时
+    private static final int READ_IDEL_TIME_OUT = 15; // 读超时
     private static final int WRITE_IDEL_TIME_OUT = 10;// 写超时
     private static final int ALL_IDEL_TIME_OUT = 0; // 所有超时
 

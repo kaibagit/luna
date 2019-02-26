@@ -38,9 +38,9 @@ public class NettyServerTransport implements ServerTransport {
 
     private volatile boolean started = false;
 
-    private static final int READ_IDEL_TIME_OUT = 0; // 读超时
+    private static final int READ_IDEL_TIME_OUT = 15; // 读超时
     private static final int WRITE_IDEL_TIME_OUT = 0;// 写超时
-    private static final int ALL_IDEL_TIME_OUT = 60; // 所有超时
+    private static final int ALL_IDEL_TIME_OUT = 0; // 所有超时
 
     public NettyServerTransport(URL url, MessageHandler messageHandler) {
         this.url = url;
