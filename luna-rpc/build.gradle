@@ -13,7 +13,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.5.8'
     compile 'ch.qos.logback:logback-core:1.1.2'
     compile 'ch.qos.logback:logback-classic:1.1.2'
-    compile 'io.netty:netty-all:4.0.34.Final'
+    compile 'io.netty:netty-all:4.1.25.Final'
     compile 'org.javassist:javassist:3.18.0-GA'
     compile 'org.apache.commons:commons-lang3:3.1'
     compile 'com.alibaba:fastjson:1.1.22'
