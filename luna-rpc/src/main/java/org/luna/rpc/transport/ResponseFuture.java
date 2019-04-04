@@ -5,8 +5,6 @@ import org.luna.rpc.core.exception.LunaRpcException;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ResponseFuture
@@ -14,16 +12,11 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ResponseFuture {
 
-    // 客户端请求回调Map，key值为messageId
-    private static ConcurrentMap<Long, ResponseFuture> futureMap = new ConcurrentHashMap<>();
-
-    private volatile boolean done = false;
+    private static ConcurrentMap<Long/** messageId */, ResponseFuture> futureMap = new ConcurrentHashMap<>();
 
     private Request request;
 
     private volatile Response  response;
-
-    private final Lock lock = new ReentrantLock();
 
     private long createTime = System.currentTimeMillis();
 
@@ -44,31 +37,34 @@ public class ResponseFuture {
     }
 
     public Object get(){
-        if(!done){
+        if(!isDone()){
             try {
                 synchronized (this){
                     this.wait(timeout);
                 }
             } catch (InterruptedException e) {}
-            if(!done){
-                Object data = request.getData();
-                if(data instanceof Invocation){
-                    Invocation invocation = (Invocation)data;
-                    String msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",System.currentTimeMillis() - createTime,invocation.getServiceName(),invocation.getMethodName(),invocation.getGroup(),invocation.getVersion());
-                    throw new LunaRpcException(msg);
-                }
+        }
+        futureMap.remove(request.getMessageId());
+        if(!isDone()){
+            Object data = request.getData();
+            String msg = null;
+            if(data != null && data instanceof Invocation){
+                Invocation invocation = (Invocation)data;
+                msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",System.currentTimeMillis() - createTime,invocation.getServiceName(),invocation.getMethodName(),invocation.getGroup(),invocation.getVersion());
+            }else{
+                msg = String.format("Invoke remote method timeout in %d ms. %s.%s application=%s,version=%s",System.currentTimeMillis() - createTime);
             }
+            throw new LunaRpcException(msg);
         }
         return response.getValue();
     }
 
     public boolean isDone(){
-        return done;
+        return response != null;
     }
 
     private void doReceived(Response response) {
         this.response = response;
-        done = true;
         synchronized (this){
             this.notifyAll();
         }
