@@ -105,7 +105,7 @@ public class NettyClientTransport implements ClientTransport {
     @Override
     public ResponseFuture send(Request request) {
         try {
-            Channel channel = (Channel) channelPool.borrowObject();
+            Channel channel = getChannel();
             long timeout = getUrl().getLongParameter(URLParamType.requestTimeout.name(),URLParamType.requestTimeout.getLongValue());
             ResponseFuture future = new ResponseFuture(request,timeout);
             channel.writeAndFlush(request);
@@ -114,5 +114,13 @@ public class NettyClientTransport implements ClientTransport {
         } catch (Exception e) {
             throw new LunaRpcException("",e);
         }
+    }
+
+    private Channel getChannel() throws Exception {
+        Channel channel = (Channel) channelPool.borrowObject();
+        while(!channel.isActive()){
+            channel = (Channel) channelPool.borrowObject();
+        }
+        return channel;
     }
 }

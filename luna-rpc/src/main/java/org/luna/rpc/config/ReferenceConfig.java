@@ -39,6 +39,9 @@ public class ReferenceConfig<T> {
     // 具体到方法的配置
     private List<MethodConfig> methods = new ArrayList<>();
 
+    /** 注册中心 */
+    private List<RegistryConfig> registries;
+
     /** 服务提供方的IP和端口，格式为：ip_1:port_1,ip_2:port_2 */
     private String direct;
 
@@ -244,5 +247,13 @@ public class ReferenceConfig<T> {
 
     public void setLoadBalance(String loadBalance) {
         this.loadBalance = loadBalance;
+    }
+
+    public List<RegistryConfig> getRegistries() {
+        return registries;
+    }
+
+    public void setRegistries(List<RegistryConfig> registries) {
+        this.registries = registries;
     }
 }

@@ -35,6 +35,10 @@ public class LoggerUtil {
         logger.warn(msg);
     }
 
+    public static void warn(String format, Object... arguments){
+        logger.warn(format,arguments);
+    }
+
     public static void debug(String format, Object arg){
         logger.debug(format,arg);
     }
