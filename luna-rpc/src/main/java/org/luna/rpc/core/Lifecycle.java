@@ -7,5 +7,5 @@ public interface Lifecycle {
 
     public void start();
 
-    public void destory();
+    public void destroy();
 }

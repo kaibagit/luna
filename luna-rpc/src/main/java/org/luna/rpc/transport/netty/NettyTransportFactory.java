@@ -46,13 +46,18 @@ public class NettyTransportFactory implements TransportFactory {
             synchronized (lock){
                 clientTransport = clientTransportMap.get(key);
                 if(clientTransport == null){
-                    clientTransport = new NettyClientTransport(url);
+                    clientTransport = new NettyClientTransport(url,this);
                     clientTransportMap.put(key,clientTransport);
                 }
             }
         }
         LoggerUtil.debug("Mapping {} => {}",url,clientTransport);
         return clientTransport;
+    }
+
+    public void destroyClientTransport(URL url){
+        String key = getMapKey(url);
+        clientTransportMap.remove(key);
     }
 
     private String getMapKey(URL url){

@@ -64,7 +64,7 @@ class MockClient implements Client{
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
 
     }
 }

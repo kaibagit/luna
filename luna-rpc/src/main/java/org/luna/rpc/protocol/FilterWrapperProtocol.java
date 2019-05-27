@@ -71,8 +71,8 @@ public class FilterWrapperProtocol implements Protocol {
                 }
 
                 @Override
-                public void destory() {
-                    tempClient.destory();
+                public void destroy() {
+                    tempClient.destroy();
                 }
 
                 @Override

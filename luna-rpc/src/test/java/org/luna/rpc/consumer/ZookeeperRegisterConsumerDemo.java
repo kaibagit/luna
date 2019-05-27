@@ -9,7 +9,7 @@ import org.luna.rpc.config.RegistryConfig;
  */
 public class ZookeeperRegisterConsumerDemo {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         RegistryConfig registryConfig = new RegistryConfig();
         registryConfig.setRegProtocol("zookeeper");
         registryConfig.setAddress("localhost:2181");
@@ -22,7 +22,14 @@ public class ZookeeperRegisterConsumerDemo {
         referenceConfig.setRegistry(registryConfig);
 
         DemoService demoService = referenceConfig.getRef();
-
-        System.out.println(demoService.hello("zookeeper"));
+        int i = 0;
+        while(true){
+            try {
+                demoService.hello(String.valueOf(i++));
+                Thread.sleep(1000L);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 }

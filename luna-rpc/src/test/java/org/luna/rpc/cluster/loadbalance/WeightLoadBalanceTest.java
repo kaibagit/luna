@@ -46,7 +46,7 @@ public class WeightLoadBalanceTest {
                 }
 
                 @Override
-                public void destory() {
+                public void destroy() {
 
                 }
             };
@@ -98,7 +98,7 @@ public class WeightLoadBalanceTest {
                 }
 
                 @Override
-                public void destory() {
+                public void destroy() {
 
                 }
             };

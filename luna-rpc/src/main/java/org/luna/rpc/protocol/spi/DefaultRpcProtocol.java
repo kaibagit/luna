@@ -64,8 +64,8 @@ public class DefaultRpcProtocol implements Protocol {
         }
 
         @Override
-        public void destory() {
-            serverTransport.destory();
+        public void destroy() {
+            serverTransport.destroy();
         }
     }
 
@@ -117,8 +117,8 @@ public class DefaultRpcProtocol implements Protocol {
         }
 
         @Override
-        public void destory() {
-            clientTransport.destory();
+        public void destroy() {
+            clientTransport.destroy();
         }
     }
 

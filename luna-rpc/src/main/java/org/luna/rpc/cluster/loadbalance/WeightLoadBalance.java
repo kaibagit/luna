@@ -8,6 +8,7 @@ import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Invocation;
 import org.luna.rpc.core.URL;
+import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.extension.Spi;
 
 /**
@@ -31,6 +32,9 @@ public class WeightLoadBalance<T> implements LoadBalance<T> {
 
     @Override
     public Client<T> select(Invocation invocation) {
+        if(clients == null || clients.isEmpty()){
+            throw new LunaRpcException(String.format("There are no providers of %s.",invocation.getServiceName()));
+        }
         Random random = new Random();
         if(sameWeight){
             return clients.get(random.nextInt(clients.size()));

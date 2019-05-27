@@ -66,7 +66,7 @@ public class DirectClusterClient<T> implements Client<T> {
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
 
     }
 

@@ -28,7 +28,7 @@ public class RoundRobinLoadBalance<T> implements LoadBalance<T> {
 
     @Override
     public Client<T> select(Invocation invocation) {
-        if(clients == null || clients.size() == 0){
+        if(clients == null || clients.isEmpty()){
             throw new LunaRpcException(String.format("There are no providers of %s.",invocation.getServiceName()));
         }
         int round = idx.getAndIncrement();

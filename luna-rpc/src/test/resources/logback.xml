@@ -15,4 +15,8 @@
         <appender-ref ref="stdout"/>
     </logger>
 
+    <logger name="org.luna" level="debug" additivity="false">
+        <appender-ref ref="stdout"/>
+    </logger>
+
 </configuration>

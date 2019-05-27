@@ -12,9 +12,13 @@ import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
+import org.luna.rpc.registry.zookeeper.ZookeeperRegistry;
 import org.luna.rpc.transport.ClientTransport;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.ResponseFuture;
+import org.luna.rpc.transport.TransportFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +28,10 @@ import java.util.concurrent.TimeUnit;
  * Created by luliru on 2016/11/18.
  */
 public class NettyClientTransport implements ClientTransport {
+
+    private static Logger logger = LoggerFactory.getLogger(NettyClientTransport.class);
+
+    private NettyTransportFactory factory;
 
     private URL url;
 
@@ -40,8 +48,9 @@ public class NettyClientTransport implements ClientTransport {
 
     private GenericObjectPool channelPool;
 
-    public NettyClientTransport(URL url){
+    public NettyClientTransport(URL url,NettyTransportFactory factory){
         this.url = url;
+        this.factory = factory;
     }
 
     @Override
@@ -98,8 +107,10 @@ public class NettyClientTransport implements ClientTransport {
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
+        factory.destroyClientTransport(url);
         group.shutdownGracefully();
+        logger.debug("NettyClientTransport:{}, group:{} destroyed.",this,this.group);
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
@@ -18,12 +19,16 @@ import org.luna.rpc.registry.NotifyListener;
 import org.luna.rpc.registry.Registry;
 import org.luna.rpc.registry.RegistryFactory;
 import org.luna.rpc.registry.RegistryURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 支持集群的Client
  * Created by luliru on 2016/12/10.
  */
 public class ClusterClient<T> implements Client<T>,NotifyListener {
+
+    private static Logger logger = LoggerFactory.getLogger(ClusterClient.class);
 
     private Class<T> serviceClass;
 
@@ -70,11 +75,11 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
         for(Map.Entry<URL,List<Client<T>>> entry : registryClients.entrySet()){
             List<Client<T>> clientList = entry.getValue();
             for(Client<T> client : clientList){
-                client.destory();
+                client.destroy();
             }
         }
     }
@@ -85,10 +90,9 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
         if(oldClients == null){
             oldClients = new ArrayList<>();
         }
-        List<Client<T>> destoryClients = new ArrayList<>();
-        for(Client c : oldClients){
-            destoryClients.add(c);  //默认所有的client都需要destroy
-        }
+
+        List<Client<T>> destoryClients = oldClients.stream().collect(Collectors.toList());  //默认所有的client都需要destroy
+
         List<Client<T>> newClients = new ArrayList<>();
         for(URL u : urls){
             Client<T> client = null;
@@ -103,6 +107,7 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
                 protocol = new FilterWrapperProtocol(protocol);
                 client = protocol.refer(serviceClass,u);
                 client.start();
+                logger.debug("new Client[{}] started.",client.getUrl());
             }
             newClients.add(client);
         }
@@ -110,7 +115,8 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
         registryClients.put(registryUrl,newClients);
         loadBalance.onRefresh(newClients);
         for(Client<T> c : destoryClients){
-            c.destory();
+            c.destroy();
+            logger.debug("Client[{}] destroyed.",c.getUrl());
         }
     }
 }

@@ -1,18 +1,26 @@
 package org.luna.rpc.registry.zookeeper;
 
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.zookeeper.CreateMode;
 import org.luna.rpc.common.constant.Constraint;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Lifecycle;
+import org.luna.rpc.core.ShutdownCleaner;
 import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.registry.NotifyListener;
 import org.luna.rpc.registry.Registry;
 import org.luna.rpc.registry.RegistryURL;
 import org.luna.rpc.util.LoggerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by luliru on 2016/12/30.
  */
 public class ZookeeperRegistry implements Registry,Lifecycle {
+
+    private static Logger logger = LoggerFactory.getLogger(ZookeeperRegistry.class);
 
     private RegistryURL url;
 
@@ -38,11 +48,13 @@ public class ZookeeperRegistry implements Registry,Lifecycle {
 
     @Override
     public void start() {
+        ShutdownCleaner.register(this);
         client.start();
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
+        ShutdownCleaner.unregister(this);
         CloseableUtils.closeQuietly(client);
     }
 
@@ -75,10 +87,13 @@ public class ZookeeperRegistry implements Registry,Lifecycle {
         try{
             ZookeeperWatcherManager watcherManager = watcherManagers.get(url.toString());
             if(watcherManager == null){
-                watcherManager = new ZookeeperWatcherManager(this.url,this.client,url);
-                watcherManagers.put(url.toString(),watcherManager);
                 String parentPath = String.format("/luna/%s/%s/providers",url.getGroup(),url.getService());
-                client.getChildren().usingWatcher(watcherManager).forPath(parentPath);
+                final PathChildrenCache pathChildrenCache = new PathChildrenCache(client, parentPath, true);
+                watcherManager = new ZookeeperWatcherManager(this.url,this.client,pathChildrenCache,url);
+                pathChildrenCache.getListenable().addListener(watcherManager);
+                pathChildrenCache.start();
+
+                watcherManagers.put(url.toString(),watcherManager);
             }
 
             watcherManager.addNotifyListener(listener);

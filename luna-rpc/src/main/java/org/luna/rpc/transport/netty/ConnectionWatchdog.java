@@ -49,6 +49,6 @@ public class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements 
 
     @Override
     public void run(Timeout timeout) throws Exception {
-        bootstrap
+//        bootstrap
     }
 }

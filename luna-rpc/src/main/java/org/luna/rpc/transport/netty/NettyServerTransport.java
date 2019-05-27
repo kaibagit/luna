@@ -87,7 +87,7 @@ public class NettyServerTransport implements ServerTransport {
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
         serverBootstrap.group().shutdownGracefully();
         serverBootstrap.childGroup().shutdownGracefully();
         eventExecutorGroup.shutdownGracefully();

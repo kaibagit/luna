@@ -2,6 +2,7 @@ package org.luna.rpc.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.luna.rpc.common.constant.URLParamType;
@@ -200,11 +201,21 @@ public class URL {
         return builder.toString();
     }
 
-    public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof URL)) {
-            return false;
-        }
-        URL ou = (URL) obj;
-        return this.toString().equals(ou.toString());
+    @Override
+    public int hashCode() {
+        return Objects.hash(protocol, host, port, service, version, parameters);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        URL url = (URL) o;
+        return port == url.port &&
+                Objects.equals(protocol, url.protocol) &&
+                Objects.equals(host, url.host) &&
+                Objects.equals(service, url.service) &&
+                Objects.equals(version, url.version) &&
+                Objects.equals(parameters, url.parameters);
     }
 }
