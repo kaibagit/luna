@@ -1,6 +1,6 @@
 package org.luna.rpc.transport.netty;
 
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -13,10 +13,6 @@ import org.luna.rpc.protocol.MessageHandler;
 import org.luna.rpc.transport.ServerTransport;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.luna.rpc.util.LoggerUtil;
@@ -35,6 +31,8 @@ public class NettyServerTransport implements ServerTransport {
     private ServerBootstrap serverBootstrap;
 
     private EventExecutorGroup eventExecutorGroup;
+
+    private Channel channel;
 
     private volatile boolean started = false;
 
@@ -71,14 +69,13 @@ public class NettyServerTransport implements ServerTransport {
                 }
             };
 
-            EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-            EventLoopGroup workerGroup = new NioEventLoopGroup();   //默认是CPU核数的2倍
             serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup, workerGroup)
+            channel = serverBootstrap.group(NettySharing.eventWorkerGroup, NettySharing.ioWorkerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(channelChannelInitializer)
                     .childOption(ChannelOption.TCP_NODELAY,true)
-                    .bind(url.getPort()).sync();
+                    .bind(url.getPort()).sync()
+                    .channel();
             started = true;
             LoggerUtil.info("NettyServerTransport started , port = {} , workerThrad = {} .",url.getPort(),workerThrad);
         }catch (Exception e){
@@ -88,8 +85,9 @@ public class NettyServerTransport implements ServerTransport {
 
     @Override
     public void destroy() {
-        serverBootstrap.group().shutdownGracefully();
-        serverBootstrap.childGroup().shutdownGracefully();
+        if(channel != null) {
+            channel.close();
+        }
         eventExecutorGroup.shutdownGracefully();
     }
 

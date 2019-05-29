@@ -32,8 +32,10 @@ public enum URLParamType {
     workerThread("workerThread",Runtime.getRuntime().availableProcessors() * 2),
 
     /** pool min conn number **/
+    @Deprecated
     minClientConnection("minClientConnection", 2),
     /** pool max conn number **/
+    @Deprecated
     maxClientConnection("maxClientConnection", 10),
 
     /** provider or consumer */
