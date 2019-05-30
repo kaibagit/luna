@@ -48,6 +48,9 @@ public class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements 
     }
 
     private void attemptToReconnectAfterAWhile(){
+        if(clientTransport.isDestryed()){
+            return;
+        }
         long timeout;
         if (attempts < exponentialIncreaseMaxAttempts) {
             attempts++;

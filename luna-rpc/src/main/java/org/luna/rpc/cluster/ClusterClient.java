@@ -3,6 +3,7 @@ package org.luna.rpc.cluster;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -26,17 +27,19 @@ import org.slf4j.LoggerFactory;
  * 支持集群的Client
  * Created by luliru on 2016/12/10.
  */
-public class ClusterClient<T> implements Client<T>,NotifyListener {
+public abstract class ClusterClient<T> implements Client<T>,NotifyListener {
 
     private static Logger logger = LoggerFactory.getLogger(ClusterClient.class);
 
     private Class<T> serviceClass;
 
-    private LoadBalance<T> loadBalance;
+    protected LoadBalance<T> loadBalance;
 
     private List<RegistryURL> registryUrls;
 
-    private URL url;
+    private List<Client<T>> clients;
+
+    protected URL url;
 
     private ConcurrentHashMap<URL, List<Client<T>>> registryClients = new ConcurrentHashMap<>();
 
@@ -51,10 +54,19 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
         return url;
     }
 
-    @Override
-    public Result call(Invocation invocation) {
-        Client<T> client = loadBalance.select(invocation);
-        return client.call(invocation);
+    protected <T> Client<T> select(Invocation invocation,Set<Client<T>> invokedClients){
+        if(invokedClients.isEmpty()){
+            return (Client<T>) loadBalance.select(invocation,clients);
+        }
+        return reselect(invocation,invokedClients);
+    }
+
+    protected <T> Client<T> reselect(Invocation invocation,Set<Client<T>> invokedClients){
+        List avalibleClients =
+                clients.stream()
+                .filter(c -> c.isAvailable() && !invokedClients.contains(c))
+                .collect(Collectors.toList());
+        return loadBalance.select(invocation,avalibleClients);
     }
 
     @Override
@@ -113,7 +125,7 @@ public class ClusterClient<T> implements Client<T>,NotifyListener {
         }
 
         registryClients.put(registryUrl,newClients);
-        loadBalance.onRefresh(newClients);
+        clients = newClients;
         for(Client<T> c : destoryClients){
             c.destroy();
             logger.debug("Client[{}] destroyed.",c.getUrl());

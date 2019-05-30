@@ -1,8 +1,5 @@
 package org.luna.rpc.cluster;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Invocation;
@@ -11,6 +8,9 @@ import org.luna.rpc.core.URL;
 import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.protocol.FilterWrapperProtocol;
 import org.luna.rpc.protocol.Protocol;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by luliru on 2017/1/3.
@@ -40,7 +40,7 @@ public class DirectClusterClient<T> implements Client<T> {
 
     @Override
     public Result call(Invocation invocation) {
-        Client<T> client = loadBalance.select(invocation);
+        Client<T> client = loadBalance.select(invocation,clients);
         return client.call(invocation);
     }
 
@@ -62,7 +62,6 @@ public class DirectClusterClient<T> implements Client<T> {
         if(loadBalance == null){
             throw new NullPointerException("Can't found "+loadBlanceName);
         }
-        loadBalance.onRefresh(clients);
     }
 
     @Override

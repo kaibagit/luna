@@ -1,15 +1,14 @@
 package org.luna.rpc.cluster.loadbalance;
 
-import java.util.List;
-import java.util.Random;
-
 import org.luna.rpc.cluster.LoadBalance;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
 import org.luna.rpc.core.Invocation;
 import org.luna.rpc.core.URL;
-import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.extension.Spi;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * 支持权重的负载均衡
@@ -18,24 +17,23 @@ import org.luna.rpc.core.extension.Spi;
 @Spi(name="weightLoadBalance")
 public class WeightLoadBalance<T> implements LoadBalance<T> {
 
-    private List<Client<T>> clients;
-
-    private boolean sameWeight = true;
-
-    private int totalWeight = 0;
-
-    public WeightLoadBalance(){}
-
-    public WeightLoadBalance(List<Client<T>> clients){
-        init(clients);
-    }
+    private Random random = new Random();
 
     @Override
-    public Client<T> select(Invocation invocation) {
-        if(clients == null || clients.isEmpty()){
-            throw new LunaRpcException(String.format("There are no providers of %s.",invocation.getServiceName()));
+    public Client<T> select(Invocation invocation, List<Client<T>> clients) {
+        int totalWeight = 0;
+        boolean sameWeight = true;
+        Integer lastestWeight = null;
+        for(Client client : clients){
+            URL url = client.getUrl();
+            int weight = url.getIntParameter(URLParamType.weight.getName(),URLParamType.weight.getIntValue());
+            totalWeight += weight;
+            if(sameWeight && lastestWeight != null && lastestWeight != weight){
+                sameWeight = false;
+            }
+            lastestWeight = weight;
         }
-        Random random = new Random();
+
         if(sameWeight){
             return clients.get(random.nextInt(clients.size()));
         }
@@ -48,25 +46,5 @@ public class WeightLoadBalance<T> implements LoadBalance<T> {
             }
         }
         return null;
-    }
-
-    @Override
-    public void onRefresh(List<Client<T>> clients) {
-        init(clients);
-    }
-
-    private void init(List<Client<T>> clients){
-        this.clients = clients;
-
-        Integer lastestWeight = null;
-        for(Client client : clients){
-            URL url = client.getUrl();
-            int weight = url.getIntParameter(URLParamType.weight.getName(),URLParamType.weight.getIntValue());
-            totalWeight += weight;
-            if(sameWeight && lastestWeight != null && lastestWeight != weight){
-                sameWeight = false;
-            }
-            lastestWeight = weight;
-        }
     }
 }

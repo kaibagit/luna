@@ -20,6 +20,8 @@ public class ZookeeperRegisterConsumerDemo {
         referenceConfig.setVersion("1.0");
         referenceConfig.setProtocol("luna");
         referenceConfig.setRegistry(registryConfig);
+        referenceConfig.setRetries(1);
+        referenceConfig.setLoadBalance("weightLoadBalance");
 
         DemoService demoService = referenceConfig.getRef();
         int i = 0;

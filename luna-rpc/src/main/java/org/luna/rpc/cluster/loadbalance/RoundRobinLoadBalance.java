@@ -16,27 +16,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Spi(name="roundRobinLoadBalance")
 public class RoundRobinLoadBalance<T> implements LoadBalance<T> {
 
-    private List<Client<T>> clients;
-
     private AtomicInteger idx = new AtomicInteger(0);
 
-    public RoundRobinLoadBalance(){}
-
-    public RoundRobinLoadBalance(List<Client<T>> clients){
-        this.clients = clients;
-    }
-
     @Override
-    public Client<T> select(Invocation invocation) {
+    public Client<T> select(Invocation invocation, List<Client<T>> clients) {
         if(clients == null || clients.isEmpty()){
             throw new LunaRpcException(String.format("There are no providers of %s.",invocation.getServiceName()));
         }
         int round = idx.getAndIncrement();
         return clients.get(round % clients.size());
-    }
-
-    @Override
-    public void onRefresh(List<Client<T>> clients) {
-        this.clients = clients;
     }
 }

@@ -120,6 +120,11 @@ public class DefaultRpcProtocol implements Protocol {
         public void destroy() {
             clientTransport.destroy();
         }
+
+        @Override
+        public boolean isAvailable(){
+            return clientTransport.isAvailable();
+        }
     }
 
 }

@@ -11,7 +11,5 @@ import java.util.List;
  */
 public interface LoadBalance<T> {
 
-    Client<T> select(Invocation invocation);
-
-    void onRefresh(List<Client<T>> clients);
+    Client<T> select(Invocation invocation,List<Client<T>> clients);
 }

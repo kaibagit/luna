@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.luna.rpc.cluster.ClusterClient;
 import org.luna.rpc.cluster.DirectClusterClient;
+import org.luna.rpc.cluster.FailoverClusterClient;
 import org.luna.rpc.common.constant.Constraint;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.Client;
@@ -44,6 +45,9 @@ public class ReferenceConfig<T> {
 
     /** 服务提供方的IP和端口，格式为：ip_1:port_1,ip_2:port_2 */
     private String direct;
+
+    /** 重试次数 */
+    private Integer retries;
 
     /** 注册中心 */
     private RegistryConfig registry;
@@ -85,8 +89,9 @@ public class ReferenceConfig<T> {
             InetAddress inetAddress = NetUtil.getLocalAddress();
             String hostAddress = inetAddress.getHostAddress();
             URL url = new URL(protocolName,hostAddress,0,group,serviceClass.getName(),version);
+            addParameters(url);
             url.addParameter(URLParamType.side.getName(),Constraint.SIDE_CONSUMER);
-            ClusterClient<T> clusterClient = new ClusterClient(serviceClass,url,registryList);
+            ClusterClient<T> clusterClient = new FailoverClusterClient(serviceClass,url,registryList);
             clusterClient.start();
 
             client = clusterClient;
@@ -140,6 +145,9 @@ public class ReferenceConfig<T> {
      * @param refUrl
      */
     private void addParameters(URL refUrl){
+        if(retries != null){
+            refUrl.addParameter(URLParamType.retries.name(),retries);
+        }
         if(serialization != null){
             refUrl.addParameter(URLParamType.serialize.name(),serialization);
         }
@@ -255,5 +263,9 @@ public class ReferenceConfig<T> {
 
     public void setRegistries(List<RegistryConfig> registries) {
         this.registries = registries;
+    }
+
+    public void setRetries(Integer retries) {
+        this.retries = retries;
     }
 }

@@ -15,6 +15,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.HashedWheelTimer;
 import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
+import org.luna.rpc.core.LifecycleBase;
 import org.luna.rpc.core.URL;
 import org.luna.rpc.core.exception.LunaRpcException;
 import org.luna.rpc.core.extension.ExtensionLoader;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by luliru on 2016/11/18.
  */
-public class NettyClientTransport implements ClientTransport {
+public class NettyClientTransport extends LifecycleBase implements ClientTransport {
 
     private static final int READ_IDEL_TIME_OUT = 15; // 读超时
     private static final int WRITE_IDEL_TIME_OUT = 10;// 写超时
@@ -59,7 +60,7 @@ public class NettyClientTransport implements ClientTransport {
     }
 
     @Override
-    public synchronized void start() {
+    public synchronized void doStart() {
         if(started){
             return;
         }
@@ -98,7 +99,7 @@ public class NettyClientTransport implements ClientTransport {
     }
 
     @Override
-    public synchronized void destroy() {
+    public synchronized void doDestroy() {
         factory.destroyClientTransport(url);
         if(channel != null) {
             channel.close();
@@ -123,6 +124,10 @@ public class NettyClientTransport implements ClientTransport {
     }
 
     public synchronized void reconnect() throws InterruptedException {
+        if(isAvailable()) return;
+        if(isDestryed()){
+            throw new LunaRpcException(String.format("%s has destroyed.",this.toString()));
+        }
         connect();
     }
 

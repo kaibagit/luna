@@ -54,11 +54,11 @@ public class WeightLoadBalanceTest {
             weightSelectCount.put(url.getGroup(),0);
         }
 
-        loadBalance = new WeightLoadBalance(clientList);
+        loadBalance = new WeightLoadBalance();
 
         int selectTimes = 10000;
         for(int i=0;i<selectTimes;i++){
-            Client client = loadBalance.select(null);
+            Client client = loadBalance.select(null,clientList);
             String group = client.getUrl().getGroup();
             weightSelectCount.put(group,weightSelectCount.get(group)+1);
         }
@@ -106,11 +106,11 @@ public class WeightLoadBalanceTest {
             weightSelectCount.put(url.getGroup(),0);
         }
 
-        loadBalance = new WeightLoadBalance(clientList);
+        loadBalance = new WeightLoadBalance();
 
         int selectTimes = 10000;
         for(int i=0;i<selectTimes;i++){
-            Client client = loadBalance.select(null);
+            Client client = loadBalance.select(null,clientList);
             String group = client.getUrl().getGroup();
             weightSelectCount.put(group,weightSelectCount.get(group)+1);
         }
