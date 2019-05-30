@@ -5,6 +5,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.kqueue.KQueue;
+import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -70,8 +74,16 @@ public class NettyClientTransport implements ClientTransport {
                     pipeline.addLast("errorHandler",new ExceptionHandler());
                 }
             };
+
+            Class channelClass = NioSocketChannel.class;
+            if(Epoll.isAvailable()){
+                channelClass = EpollSocketChannel.class;
+            }else if(KQueue.isAvailable()){
+                channelClass = KQueueSocketChannel.class;
+            }
+
             Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(NettySharing.ioWorkerGroup).channel(NioSocketChannel.class)
+            bootstrap.group(NettySharing.ioWorkerGroup()).channel(channelClass)
                     .handler(channelChannelInitializer)
                     .option(ChannelOption.TCP_NODELAY,true);
 

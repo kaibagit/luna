@@ -1,6 +1,10 @@
 package org.luna.rpc.transport.netty;
 
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.kqueue.KQueue;
+import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -69,9 +73,16 @@ public class NettyServerTransport implements ServerTransport {
                 }
             };
 
+            Class channelClass = NioServerSocketChannel.class;
+            if(Epoll.isAvailable()){
+                channelClass = EpollServerSocketChannel.class;
+            }else if(KQueue.isAvailable()){
+                channelClass = KQueueServerSocketChannel.class;
+            }
+
             serverBootstrap = new ServerBootstrap();
-            channel = serverBootstrap.group(NettySharing.eventWorkerGroup, NettySharing.ioWorkerGroup)
-                    .channel(NioServerSocketChannel.class)
+            channel = serverBootstrap.group(NettySharing.acceptGroup(), NettySharing.ioWorkerGroup())
+                    .channel(channelClass)
                     .childHandler(channelChannelInitializer)
                     .childOption(ChannelOption.TCP_NODELAY,true)
                     .bind(url.getPort()).sync()
