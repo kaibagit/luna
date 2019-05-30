@@ -5,7 +5,11 @@ package org.luna.rpc.core;
  */
 public interface Lifecycle {
 
-    public void start();
+    void start();
 
-    public void destroy();
+    void destroy();
+
+    default boolean isAvailable(){
+        return true;
+    }
 }

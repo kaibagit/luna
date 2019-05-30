@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class DirectConsumerDemo {
 
-    public static void main(String[] args) throws TException {
+    public static void main(String[] args) throws TException, InterruptedException {
         List<MethodConfig> methodConfigs = new ArrayList<>();
         MethodConfig methodConfig = new MethodConfig();
         methodConfig.setName("hello");
@@ -59,8 +59,14 @@ public class DirectConsumerDemo {
         referenceConfig3.setDirect("localhost:8090");
         org.luna.rpc.api.thrift.MemberService.Iface thriftMemservice = referenceConfig3.getRef();
         thriftMemservice.create(new Member(1L,"luliru",2));
-        System.out.println(thriftMemservice.findById(1L));
-
+        while(true){
+            try{
+                System.out.println(thriftMemservice.findById(1L));
+                Thread.sleep(5000L);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 
 }

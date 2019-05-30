@@ -12,6 +12,7 @@ import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.HashedWheelTimer;
 import org.luna.rpc.codec.Codec;
 import org.luna.rpc.common.constant.URLParamType;
 import org.luna.rpc.core.URL;
@@ -20,8 +21,6 @@ import org.luna.rpc.core.extension.ExtensionLoader;
 import org.luna.rpc.transport.ClientTransport;
 import org.luna.rpc.transport.Request;
 import org.luna.rpc.transport.ResponseFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -30,20 +29,24 @@ import java.util.concurrent.TimeUnit;
  */
 public class NettyClientTransport implements ClientTransport {
 
-    private static Logger logger = LoggerFactory.getLogger(NettyClientTransport.class);
+    private static final int READ_IDEL_TIME_OUT = 15; // 读超时
+    private static final int WRITE_IDEL_TIME_OUT = 10;// 写超时
+    private static final int ALL_IDEL_TIME_OUT = 0; // 所有超时
+
+    private static final HashedWheelTimer sharingTimer = new HashedWheelTimer();
 
     private NettyTransportFactory factory;
 
     private URL url;
 
+    private Bootstrap bootstrap;
+
+    private ChannelInitializer<SocketChannel> channelChannelInitializer;
+
     private Channel channel;
 
     /** 是否已启动 */
-    private volatile boolean started = false;
-
-    private static final int READ_IDEL_TIME_OUT = 15; // 读超时
-    private static final int WRITE_IDEL_TIME_OUT = 10;// 写超时
-    private static final int ALL_IDEL_TIME_OUT = 0; // 所有超时
+    private boolean started = false;
 
     public NettyClientTransport(URL url,NettyTransportFactory factory){
         this.url = url;
@@ -62,7 +65,7 @@ public class NettyClientTransport implements ClientTransport {
         }
         try{
             Codec codec = ExtensionLoader.getExtension(Codec.class,url.getParameter(URLParamType.codec.getName(),URLParamType.codec.getValue()));
-            ChannelInitializer<SocketChannel> channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
+            channelChannelInitializer = new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ChannelPipeline pipeline = ch.pipeline();
@@ -71,6 +74,7 @@ public class NettyClientTransport implements ClientTransport {
                     pipeline.addLast(new IdleStateHandler(READ_IDEL_TIME_OUT,
                             WRITE_IDEL_TIME_OUT, ALL_IDEL_TIME_OUT, TimeUnit.SECONDS));     //心跳触发handler
                     pipeline.addLast("handler",new NettyClientHandler(NettyClientTransport.this));
+                    pipeline.addLast("connectionWatchDog",new ConnectionWatchdog(NettyClientTransport.this,sharingTimer));
                     pipeline.addLast("errorHandler",new ExceptionHandler());
                 }
             };
@@ -81,13 +85,12 @@ public class NettyClientTransport implements ClientTransport {
             }else if(KQueue.isAvailable()){
                 channelClass = KQueueSocketChannel.class;
             }
-
-            Bootstrap bootstrap = new Bootstrap();
+            bootstrap = new Bootstrap();
             bootstrap.group(NettySharing.ioWorkerGroup()).channel(channelClass)
                     .handler(channelChannelInitializer)
                     .option(ChannelOption.TCP_NODELAY,true);
 
-            channel = bootstrap.connect(url.getHost(), url.getPort()).sync().channel();
+            connect();
         }catch (Exception e){
             throw new LunaRpcException("NettyClientTransport start error .",e);
         }
@@ -95,7 +98,7 @@ public class NettyClientTransport implements ClientTransport {
     }
 
     @Override
-    public void destroy() {
+    public synchronized void destroy() {
         factory.destroyClientTransport(url);
         if(channel != null) {
             channel.close();
@@ -112,5 +115,25 @@ public class NettyClientTransport implements ClientTransport {
         } catch (Exception e) {
             throw new LunaRpcException("send to remote server failed.",e);
         }
+    }
+
+    @Override
+    public boolean isAvailable(){
+        return channel != null && channel.isActive();
+    }
+
+    public synchronized void reconnect() throws InterruptedException {
+        connect();
+    }
+
+    private void connect() throws InterruptedException {
+        channel = bootstrap.connect(url.getHost(), url.getPort()).sync().channel();
+    }
+
+    @Override
+    public String toString() {
+        return "NettyClientTransport{" +
+                "url=" + url +
+                '}';
     }
 }

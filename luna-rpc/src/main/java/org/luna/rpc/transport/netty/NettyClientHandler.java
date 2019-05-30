@@ -42,8 +42,10 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
                     channel.close();
                     throw new LunaRpcException("Lost connection from "+channel.remoteAddress());
                 }
-            }else{
+            }else if(event.state() == IdleState.READER_IDLE){
                 channel.close();
+            }else{
+                LoggerUtil.warn(String.format("Unknown IdleStateEvent[state=%s] with %s.",event.state().toString(),channel.toString()));
             }
         }else{
             ctx.fireUserEventTriggered(evt);
